@@ -4,6 +4,8 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+## v0.0.1 - 2026-11-26
+
 ### Added
 
 - The command `mlib` with `help` and `version`. Each other command of spec 11.1 exits with code 3 and names the milestone that adds it.
