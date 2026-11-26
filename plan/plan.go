@@ -90,7 +90,7 @@ type group struct {
 }
 
 // join joins the groups that come one after the other until each has at least min pages. The pages of a group come from size.
-func join(gs []group, min float64, size func(group) float64) []group {
+func join(gs []group, least float64, size func(group) float64) []group {
 	var out []group
 	var cur *group
 	var pages float64
@@ -103,13 +103,13 @@ func join(gs []group, min float64, size func(group) float64) []group {
 			cur.modules = append(cur.modules, g.modules...)
 			pages += size(g)
 		}
-		if pages >= min {
+		if pages >= least {
 			out = append(out, *cur)
 			cur = nil
 		}
 	}
 	if cur != nil {
-		if len(out) > 0 && pages < min/2 {
+		if len(out) > 0 && pages < least/2 {
 			last := &out[len(out)-1]
 			last.keys = append(last.keys, cur.keys...)
 			last.modules = append(last.modules, cur.modules...)
@@ -140,7 +140,7 @@ func titles(keys []string) string {
 }
 
 // chapters splits the modules of a volume by their prefix, and a prefix with too many modules by its next folder.
-func chapters(vol *blueprint.Volume, vm *blueprint.VolumeMap, mods []string, max int) []group {
+func chapters(vol *blueprint.Volume, vm *blueprint.VolumeMap, mods []string, most int) []group {
 	byPrefix := map[string][]string{}
 	for _, m := range mods {
 		v, p, ok := vm.Home(m)
@@ -157,7 +157,7 @@ func chapters(vol *blueprint.Volume, vm *blueprint.VolumeMap, mods []string, max
 			continue
 		}
 		sort.Strings(ms)
-		if len(ms) <= max {
+		if len(ms) <= most {
 			out = append(out, group{key: p, modules: ms})
 			continue
 		}
@@ -204,7 +204,7 @@ func title(path string) string {
 	last := path[strings.LastIndex(path, "/")+1:]
 	var b strings.Builder
 	for i, r := range last {
-		if i > 0 && r >= 'A' && r <= 'Z' && !(last[i-1] >= 'A' && last[i-1] <= 'Z') {
+		if i > 0 && r >= 'A' && r <= 'Z' && (last[i-1] < 'A' || last[i-1] > 'Z') {
 			b.WriteByte(' ')
 			r += 'a' - 'A'
 		}
@@ -421,10 +421,10 @@ func Make(in Input, volID string, o Options) (*Plan, error) {
 }
 
 // edges gives the places with at least min uses, in order of the place.
-func edges(uses map[string]int, min int) []string {
+func edges(uses map[string]int, least int) []string {
 	var out []string
 	for pl, n := range uses {
-		if n >= min {
+		if n >= least {
 			out = append(out, pl)
 		}
 	}
