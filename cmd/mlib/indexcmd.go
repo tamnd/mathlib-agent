@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	neturl "net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -31,8 +32,24 @@ const (
 
 var httpClient = &http.Client{Timeout: 10 * time.Minute}
 
-// get fetches a URL. It sends GITHUB_TOKEN when it is set, for the rate limit of the API.
+// allowedHosts are the hosts that mlib downloads from.
+var allowedHosts = map[string]bool{
+	"api.github.com":                       true,
+	"github.com":                           true,
+	"objects.githubusercontent.com":        true,
+	"release-assets.githubusercontent.com": true,
+	"raw.githubusercontent.com":            true,
+}
+
+// get fetches a URL. It sends GITHUB_TOKEN when it is set, for the rate limit of the API. It refuses a host that is not in allowedHosts.
 func get(ctx context.Context, url string, accept string) (io.ReadCloser, error) {
+	u, err := neturl.Parse(url)
+	if err != nil {
+		return nil, err
+	}
+	if u.Scheme != "https" || !allowedHosts[u.Hostname()] {
+		return nil, fmt.Errorf("mlib does not download from %s", url)
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
@@ -44,7 +61,7 @@ func get(ctx context.Context, url string, accept string) (io.ReadCloser, error) 
 	if t := os.Getenv("GITHUB_TOKEN"); t != "" && strings.HasPrefix(url, "https://api.github.com/") {
 		req.Header.Set("Authorization", "Bearer "+t)
 	}
-	resp, err := httpClient.Do(req)
+	resp, err := httpClient.Do(req) //nolint:gosec // get accepts only the HTTPS hosts in allowedHosts
 	if err != nil {
 		return nil, err
 	}
@@ -61,10 +78,11 @@ func download(ctx context.Context, url, path string) error {
 		return err
 	}
 	defer func() { _ = body.Close() }()
-	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
+	path = filepath.Clean(path)
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil { //nolint:gosec // the path comes from the -out flag of the user
 		return err
 	}
-	f, err := os.Create(filepath.Clean(path))
+	f, err := os.Create(path) //nolint:gosec // the path comes from the -out flag of the user
 	if err != nil {
 		return err
 	}
@@ -267,7 +285,8 @@ func writeJSON(path string, v any) error {
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
+	path = filepath.Clean(path)
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil { //nolint:gosec // the path comes from the -out flag of the user
 		return err
 	}
 	return os.WriteFile(filepath.Clean(path), append(b, '\n'), 0o600)

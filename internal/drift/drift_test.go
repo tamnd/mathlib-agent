@@ -22,7 +22,7 @@ func TestCompare(t *testing.T) {
 		},
 		Modules: []index.Module{{Module: "Mathlib.A"}},
 	}
-	new := &index.Index{
+	cur := &index.Index{
 		Header: index.Header{Mathlib: "b", Toolchain: "4.37.0"},
 		Decls: []index.Decl{
 			{Name: "keep", Module: "Mathlib.A", TypeHash: "1"},
@@ -37,7 +37,7 @@ func TestCompare(t *testing.T) {
 		},
 		Modules: []index.Module{{Module: "Mathlib.B"}},
 	}
-	r := Compare(old, new, Options{Depths: map[string]depth.Result{"main": {Depth: depth.E3}}, Added: true})
+	r := Compare(old, cur, Options{Depths: map[string]depth.Result{"main": {Depth: depth.E3}}, Added: true})
 	want := map[string]int{Removed: 1, Renamed: 2, TypeChanged: 2, Moved: 1, AttrChanged: 1, DocChanged: 1, ValueChanged: 1, Added: 2, ModuleAdded: 1, ModuleRemoved: 1}
 	for c, n := range want {
 		if r.Counts[c] != n {
@@ -56,8 +56,8 @@ func TestCompare(t *testing.T) {
 
 func TestCompareAddedCountOnly(t *testing.T) {
 	old := &index.Index{Header: index.Header{Toolchain: "x"}}
-	new := &index.Index{Header: index.Header{Toolchain: "x"}, Decls: []index.Decl{{Name: "a"}, {Name: "b"}}}
-	r := Compare(old, new, Options{})
+	cur := &index.Index{Header: index.Header{Toolchain: "x"}, Decls: []index.Decl{{Name: "a"}, {Name: "b"}}}
+	r := Compare(old, cur, Options{})
 	if r.Counts[Added] != 2 || len(r.Items) != 0 {
 		t.Errorf("counts %v, items %v", r.Counts, r.Items)
 	}

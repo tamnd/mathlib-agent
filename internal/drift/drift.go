@@ -63,14 +63,14 @@ type Options struct {
 }
 
 // Compare returns the drift from old to new. When the toolchains differ, the type hashes cannot be compared, and the type text is used instead.
-func Compare(old, new *index.Index, o Options) Record {
+func Compare(old, cur *index.Index, o Options) Record {
 	r := Record{
 		From:      old.Header.Mathlib,
-		To:        new.Header.Mathlib,
-		Toolchain: [2]string{old.Header.Toolchain, new.Header.Toolchain},
+		To:        cur.Header.Mathlib,
+		Toolchain: [2]string{old.Header.Toolchain, cur.Header.Toolchain},
 		Counts:    map[string]int{},
 	}
-	sameHash := old.Header.Toolchain == new.Header.Toolchain
+	sameHash := old.Header.Toolchain == cur.Header.Toolchain
 	add := func(it Item) {
 		r.Counts[it.Class]++
 		if it.Class == Added && !o.Added {
@@ -86,22 +86,22 @@ func Compare(old, new *index.Index, o Options) Record {
 	}
 	// The old names that are gone, by type, to find renames with no alias.
 	added := map[string][]*index.Decl{}
-	for i := range new.Decls {
-		d := &new.Decls[i]
+	for i := range cur.Decls {
+		d := &cur.Decls[i]
 		if _, ok := old.Lookup(d.Name); !ok {
 			added[typeKey(d)] = append(added[typeKey(d)], d)
 		}
 	}
 	targets := map[string]bool{}
-	for i := range new.Decls {
-		if dep := new.Decls[i].Deprecated; dep != nil && dep.Target != "" {
+	for i := range cur.Decls {
+		if dep := cur.Decls[i].Deprecated; dep != nil && dep.Target != "" {
 			targets[dep.Target] = true
 		}
 	}
 	renamedTo := map[string]bool{}
 	for i := range old.Decls {
 		od := &old.Decls[i]
-		nd, ok := new.Lookup(od.Name)
+		nd, ok := cur.Lookup(od.Name)
 		if !ok {
 			if cands := added[typeKey(od)]; len(cands) > 0 {
 				best := nearest(od, cands)
@@ -142,14 +142,14 @@ func Compare(old, new *index.Index, o Options) Record {
 			add(Item{Class: DocChanged, Name: nd.Name, Module: nd.Module, Severity: Info})
 		}
 	}
-	for i := range new.Decls {
-		nd := &new.Decls[i]
+	for i := range cur.Decls {
+		nd := &cur.Decls[i]
 		if _, ok := old.Lookup(nd.Name); ok || renamedTo[nd.Name] || nd.Deprecated != nil {
 			continue
 		}
 		add(Item{Class: Added, Name: nd.Name, Module: nd.Module, Severity: Info})
 	}
-	om, nm := moduleSet(old), moduleSet(new)
+	om, nm := moduleSet(old), moduleSet(cur)
 	for m := range om {
 		if !nm[m] {
 			add(Item{Class: ModuleRemoved, Name: m, Severity: Info})
