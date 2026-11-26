@@ -6,24 +6,25 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
 	"go.yaml.in/yaml/v3"
 
-	"github.com/tamnd/mathlib-agent/internal/index"
+	"github.com/tamnd/mathlib-agent/index"
 )
 
 // Pattern is the condition of a family. Each field that is set must match.
 type Pattern struct {
-	// Name is a glob over the full name. "*" matches any text in one name component, "**" matches any text, and "{op}" matches one of the ops of the family.
+	// Name is a glob over the end of the full name, on a boundary of the components. "map_{op}" matches the last component and "*.coe_mk" the last two. "*" matches any text in one component, "**" matches any text, and "{op}" matches one of the ops of the family.
 	Name string `yaml:"name,omitempty"`
-	// Last is a glob over the last component of the name only.
-	Last string `yaml:"last,omitempty"`
 	// Kind is the kind of the declaration, for example theorem or instance.
 	Kind string `yaml:"kind,omitempty"`
 	// Attr is an attribute that the declaration must have, for example simp.
 	Attr string `yaml:"attr,omitempty"`
+	// TypeHead is a constant that the type or the value uses, for example FunLike.
+	TypeHead string `yaml:"typeHead,omitempty"`
 	// TypeHas is a text that the pretty-printed type must contain.
 	TypeHas string `yaml:"typeHas,omitempty"`
 	// Twin is "to_additive" or "to_dual". The declaration matches when its name is the twin of another declaration of the index.
@@ -40,7 +41,7 @@ type Family struct {
 	Text    string   `yaml:"text"`
 	Depth   string   `yaml:"depth"`
 
-	name, last *regexp.Regexp
+	name *regexp.Regexp
 }
 
 // Load reads and compiles blueprint/families.yaml.
@@ -87,15 +88,12 @@ func Check(fs []*Family) []string {
 		if p.Twin != "" && p.Twin != "to_additive" && p.Twin != "to_dual" {
 			probs = append(probs, where+": the twin must be to_additive or to_dual")
 		}
-		usesOp := strings.Contains(p.Name+p.Last+f.Text, "{op}")
+		usesOp := strings.Contains(p.Name+f.Text, "{op}")
 		if usesOp && len(f.Ops) == 0 {
 			probs = append(probs, where+": the pattern uses {op} but the family has no ops")
 		}
 		var err error
 		if f.name, err = glob(p.Name, f.Ops); err != nil {
-			probs = append(probs, where+": "+err.Error())
-		}
-		if f.last, err = glob(p.Last, f.Ops); err != nil {
 			probs = append(probs, where+": "+err.Error())
 		}
 	}
@@ -108,7 +106,7 @@ func glob(g string, ops []string) (*regexp.Regexp, error) {
 		return nil, nil
 	}
 	var b strings.Builder
-	b.WriteString("^")
+	b.WriteString(`^(.*\.)?`)
 	for i := 0; i < len(g); {
 		switch {
 		case strings.HasPrefix(g[i:], "**"):
@@ -137,14 +135,14 @@ func glob(g string, ops []string) (*regexp.Regexp, error) {
 var (
 	additive = [][2]string{
 		{"Mul", "Add"}, {"mul", "add"}, {"One", "Zero"}, {"one", "zero"}, {"Inv", "Neg"}, {"inv", "neg"},
-		{"Div", "Sub"}, {"div", "sub"}, {"Prod", "Sum"}, {"prod", "sum"}, {"Pow", "SMul"}, {"pow", "nsmul"},
+		{"Div", "Sub"}, {"div", "sub"}, {"prod", "sum"}, {"Pow", "SMul"}, {"pow", "nsmul"},
 		{"zpow", "zsmul"}, {"Monoid", "AddMonoid"}, {"Group", "AddGroup"}, {"Semigroup", "AddSemigroup"},
 		{"Units", "AddUnits"}, {"Submonoid", "AddSubmonoid"}, {"Subgroup", "AddSubgroup"}, {"Mon", "AddMon"},
 		{"mulIndicator", "indicator"}, {"MulAction", "AddAction"}, {"Commute", "AddCommute"},
 	}
 	dual = [][2]string{
 		{"sup", "inf"}, {"Sup", "Inf"}, {"bot", "top"}, {"Bot", "Top"}, {"min", "max"}, {"Min", "Max"},
-		{"le", "ge"}, {"lt", "gt"}, {"left", "right"}, {"Iic", "Ici"}, {"Iio", "Ioi"}, {"lower", "upper"},
+		{"Iic", "Ici"}, {"Iio", "Ioi"}, {"lower", "upper"},
 		{"Lower", "Upper"}, {"monotone", "antitone"}, {"Monotone", "Antitone"},
 	}
 	splitRe = regexp.MustCompile(`[A-Z]?[a-z0-9]+|[A-Z]+(?:[A-Z][a-z]|$)|[^A-Za-z0-9]`)
@@ -177,19 +175,49 @@ func sources(n string, swaps [][2]string) []string {
 	return out
 }
 
-// Twins finds the declarations whose name is the twin of another declaration of the index, for each kind of twin. The value is the name of the source.
-func Twins(ix *index.Index) map[string]map[string]string {
-	names := make(map[string]bool, len(ix.Decls))
-	for i := range ix.Decls {
-		names[ix.Decls[i].Name] = true
+// The symbol swaps of the twins in a pretty-printed type. The first symbol is the source, the second is the twin.
+var (
+	additiveSyms = [][2]string{{"*", "+"}, {"1", "0"}, {"/", "-"}, {"∏", "∑"}}
+	dualSyms     = [][2]string{{"⊔", "⊓"}, {"⊥", "⊤"}, {"⨆", "⨅"}}
+	identRe      = regexp.MustCompile(`[A-Za-z_][A-Za-z0-9_'.]*`)
+)
+
+// back changes a type of a twin to the type that its source must have: each word of each identifier and each symbol goes back to its source.
+func back(t string, swaps, syms [][2]string) string {
+	t = identRe.ReplaceAllStringFunc(t, func(id string) string {
+		if s := sources(id, swaps); len(s) > 0 {
+			return s[0]
+		}
+		return id
+	})
+	r := make([]string, 0, 2*len(syms))
+	for _, s := range syms {
+		r = append(r, s[1], s[0])
 	}
+	return strings.NewReplacer(r...).Replace(t)
+}
+
+// Twins finds the declarations whose name is the twin of another declaration of the index, for each kind of twin. The value is the name of the source. A twin must have the type of its source after the swaps, so a pair of names such as divByMonic_zero and divByMonic_one with different statements is not a twin.
+func Twins(ix *index.Index) map[string]map[string]string {
+	types := make(map[string]string, len(ix.Decls))
+	for i := range ix.Decls {
+		types[ix.Decls[i].Name] = ix.Decls[i].Type
+	}
+	kinds := []struct {
+		name        string
+		swaps, syms [][2]string
+	}{{"to_additive", additive, additiveSyms}, {"to_dual", dual, dualSyms}}
 	out := map[string]map[string]string{"to_additive": {}, "to_dual": {}}
 	for i := range ix.Decls {
-		n := ix.Decls[i].Name
-		for kind, swaps := range map[string][][2]string{"to_additive": additive, "to_dual": dual} {
-			for _, src := range sources(n, swaps) {
-				if src != n && names[src] {
-					out[kind][n] = src
+		d := &ix.Decls[i]
+		for _, k := range kinds {
+			for _, src := range sources(d.Name, k.swaps) {
+				st, ok := types[src]
+				if !ok || src == d.Name {
+					continue
+				}
+				if back(d.Type, k.swaps, k.syms) == back(st, k.swaps, k.syms) {
+					out[k.name][d.Name] = src
 				}
 			}
 		}
@@ -205,13 +233,6 @@ type Result struct {
 	Count map[string]int
 	// Twin gives the source of each twin member.
 	Twin map[string]string
-}
-
-func lastComponent(n string) string {
-	if i := strings.LastIndexByte(n, '.'); i >= 0 {
-		return n[i+1:]
-	}
-	return n
 }
 
 // Matches tells whether one declaration matches the pattern of a family. twins comes from Twins.
@@ -232,7 +253,7 @@ func (f *Family) Matches(d *index.Decl, twins map[string]map[string]string) bool
 	if f.name != nil && !f.name.MatchString(d.Name) {
 		return false
 	}
-	if f.last != nil && !f.last.MatchString(lastComponent(d.Name)) {
+	if p.TypeHead != "" && !slices.Contains(d.Uses, p.TypeHead) {
 		return false
 	}
 	if p.Twin != "" {

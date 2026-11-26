@@ -13,6 +13,7 @@ import (
 
 	"github.com/tamnd/mathlib-agent/blueprint"
 	"github.com/tamnd/mathlib-agent/edition"
+	"github.com/tamnd/mathlib-agent/family"
 )
 
 // errFailed is a failed check. The details are already written. main exits with code 1.
@@ -188,6 +189,14 @@ func runCheck(args []string, stdout, stderr io.Writer) error {
 			fmt.Fprintln(stdout, "  problem:", p)
 		}
 		failed = failed || len(probs) > 0
+	}
+	if _, err := os.Stat(familiesPath(f.mapDir)); err == nil {
+		if fams, err := family.Load(familiesPath(f.mapDir)); err != nil {
+			fmt.Fprintln(stdout, "blueprint/families.yaml:", err)
+			failed = true
+		} else {
+			fmt.Fprintf(stdout, "blueprint/families.yaml: %d families, 0 problems\n", len(fams))
+		}
 	}
 	if eds, err := edition.Load(edition.Path(f.mapDir)); err != nil {
 		fmt.Fprintln(stdout, "records/editions.json:", err)

@@ -9,8 +9,8 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/tamnd/mathlib-agent/internal/family"
-	"github.com/tamnd/mathlib-agent/internal/index"
+	"github.com/tamnd/mathlib-agent/family"
+	"github.com/tamnd/mathlib-agent/index"
 )
 
 // familiesPath is the place of the family records in a checkout of tamnd/mathlib.

@@ -31,6 +31,7 @@ The packages are at the root of the module, so other Go programs can import them
 | `depth` | compute the depth E0 to E3 of each declaration (spec 04.4) |
 | `coverage` | compute the coverage numbers (spec 04.5) and the module records (spec 09.1) |
 | `drift` | compare two indexes and write the drift items (spec 05.4) |
+| `family` | read `blueprint/families.yaml` and give each declaration at most one E0 family (spec 09.4) |
 | `edition` | read and write the edition log `records/editions.json` (spec 05.7) |
 | `site` | build and check the site mathlib.tamnd.com |
 

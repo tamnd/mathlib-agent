@@ -4,6 +4,11 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+### Added
+
+- `mlib family match`, `mlib family list` and `mlib family show`. They read `blueprint/families.yaml` and give each declaration the first family whose pattern it matches. A pattern can test the end of the name, the kind, an attribute, a constant that the declaration uses, a text of the type, a deprecated alias, and an additive or order dual twin. A twin must have the type of its source after the swaps of words and symbols. `mlib family match -out` writes `records/families.json`.
+- `mlib check` also checks `blueprint/families.yaml`.
+
 ## v0.1.0 - 2026-11-26
 
 ### Changed
