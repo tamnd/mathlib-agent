@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/tamnd/mathlib-agent/internal/blueprint"
+	"github.com/tamnd/mathlib-agent/internal/edition"
 )
 
 // errFailed is a failed check. The details are already written. main exits with code 1.
@@ -187,6 +188,12 @@ func runCheck(args []string, stdout, stderr io.Writer) error {
 			fmt.Fprintln(stdout, "  problem:", p)
 		}
 		failed = failed || len(probs) > 0
+	}
+	if eds, err := edition.Load(edition.Path(f.mapDir)); err != nil {
+		fmt.Fprintln(stdout, "records/editions.json:", err)
+		failed = true
+	} else if eds != nil {
+		fmt.Fprintf(stdout, "records/editions.json: %d editions in the log, 0 problems\n", len(eds))
 	}
 	if failed {
 		return errFailed
