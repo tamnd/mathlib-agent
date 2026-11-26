@@ -89,7 +89,7 @@ type group struct {
 	keys    []string
 }
 
-// join joins the groups that come one after the other until each has at least min pages. The pages of a group come from size.
+// join joins the groups that come one after the other until each has at least the given pages. The pages of a group come from size.
 func join(gs []group, least float64, size func(group) float64) []group {
 	var out []group
 	var cur *group
@@ -420,7 +420,7 @@ func Make(in Input, volID string, o Options) (*Plan, error) {
 	return p, nil
 }
 
-// edges gives the places with at least min uses, in order of the place.
+// edges gives the places with at least the given uses, in order of the place.
 func edges(uses map[string]int, least int) []string {
 	var out []string
 	for pl, n := range uses {
