@@ -11,8 +11,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tamnd/mathlib-agent/internal/blueprint"
-	"github.com/tamnd/mathlib-agent/internal/edition"
+	"github.com/tamnd/mathlib-agent/blueprint"
+	"github.com/tamnd/mathlib-agent/edition"
 )
 
 // errFailed is a failed check. The details are already written. main exits with code 1.

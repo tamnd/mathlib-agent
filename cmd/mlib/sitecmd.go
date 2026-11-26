@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tamnd/mathlib-agent/internal/blueprint"
-	"github.com/tamnd/mathlib-agent/internal/drift"
-	"github.com/tamnd/mathlib-agent/internal/site"
+	"github.com/tamnd/mathlib-agent/blueprint"
+	"github.com/tamnd/mathlib-agent/drift"
+	"github.com/tamnd/mathlib-agent/site"
 )
 
 func runSite(args []string, stdout, stderr io.Writer) error {

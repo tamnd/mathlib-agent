@@ -10,7 +10,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/tamnd/mathlib-agent/internal/edition"
+	"github.com/tamnd/mathlib-agent/edition"
 )
 
 const leanRepo = "tamnd/mathlib-lean"
