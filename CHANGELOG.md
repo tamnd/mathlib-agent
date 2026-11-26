@@ -6,6 +6,10 @@ Each release has a section. The newest release is first.
 
 ### Added
 
+- `mlib plan -volume V13` makes the draft section plan of a volume and writes it to `blueprint/sections/V13.yaml` with `-write`. The chapters come from the prefixes of the volume. A prefix with more than 40 modules splits by its next folder, and small groups join until a chapter has about 20 pages. A section takes modules until it has about 10 pages, with the estimates of spec 04.7. Each section has its modules, the E3 and E2 lists, the families, the requires edges and the counts by depth. The command does not write over a plan with the status `accepted`.
+
+### Added
+
 - `mlib family match`, `mlib family list` and `mlib family show`. They read `blueprint/families.yaml` and give each declaration the first family whose pattern it matches. A pattern can test the end of the name, the kind, an attribute, a constant that the declaration uses, a text of the type, a deprecated alias, and an additive or order dual twin. A twin must have the type of its source after the swaps of words and symbols. `mlib family match -out` writes `records/families.json`.
 - `mlib check` also checks `blueprint/families.yaml`.
 
