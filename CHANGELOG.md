@@ -4,6 +4,10 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+### Added
+
+- `mlib catalogue` and the package `catalogue` write the rows of the Catalogue volumes of spec 06.4, one file `C<NN>.jsonl.gz` for each main volume. Each row has the sentence of the declaration from the E1 record, the E0 family or the docstring, and the field `source` tells which. On Mathlib e54979a532, C05 has 24,928 rows and C13 has 20,493 rows.
+
 ## v0.1.1 - 2026-11-26
 
 ### Added

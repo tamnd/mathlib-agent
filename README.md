@@ -32,6 +32,10 @@ Run `mlib help` to see the commands. A usage error exits with code 2. A failed c
 
 `mlib report -week 2027-W03` writes the weekly report: the last sync and its age, the drift of the week, the coverage, the runs and the spend by role, and the editions. When the last sync is more than 30 days old, the report gives an alert. `mlib report -edition v4.36.0` writes the report of an edition, with the drift since the last edition. Without `-write`, the command prints the report. With `-write`, it writes `reports/weekly/<week>.md` or `reports/editions/<tag>.md`.
 
+### The Catalogue
+
+`mlib catalogue -index index -map ../mathlib -volume V05,V13 -out catalogue` writes the rows of the Catalogue volumes of spec 06.4, one file `C05.jsonl.gz` for each main volume. The first line is a header with the counts. Each other line is one declaration whose home is in the volume, in module order, with the kind, the attributes, the depth, the home section and a sentence. The sentence is the E1 record when its type hash is current and no check failed. When there is no such record, the sentence is the text of the E0 family, then the first sentence of the docstring. The field `source` tells which. `mlhb catalogue` of tamnd/mathlib-handbook sets the files as books.
+
 ## Use as a library
 
 The packages are at the root of the module, so other Go programs can import them. The API can change before v1.0.0.
@@ -42,6 +46,7 @@ The packages are at the root of the module, so other Go programs can import them
 | `blueprint` | read and check `blueprint/volumes.yaml` and `blueprint/milestones.yaml` of the map |
 | `index` | read the index of Mathlib that mathlib-lean writes |
 | `depth` | compute the depth E0 to E3 of each declaration (spec 04.4) |
+| `catalogue` | make the rows of the Catalogue volumes (spec 06.4) |
 | `coverage` | compute the coverage numbers (spec 04.5) and the module records (spec 09.1) |
 | `drift` | compare two indexes and write the drift items (spec 05.4) |
 | `family` | read `blueprint/families.yaml` and give each declaration at most one E0 family (spec 09.4) |
