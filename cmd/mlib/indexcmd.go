@@ -50,7 +50,7 @@ func get(ctx context.Context, url string, accept string) (io.ReadCloser, error) 
 	if u.Scheme != "https" || !allowedHosts[u.Hostname()] {
 		return nil, fmt.Errorf("mlib does not download from %s", url)
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil) //nolint:gosec // the host is checked above
 	if err != nil {
 		return nil, err
 	}
