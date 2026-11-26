@@ -22,6 +22,7 @@ const (
 	Moved         = "moved"
 	ModuleAdded   = "module-added"
 	ModuleRemoved = "module-removed"
+	ModuleRenamed = "module-renamed"
 	Curated       = "curated"
 )
 
