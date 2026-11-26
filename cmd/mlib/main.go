@@ -35,7 +35,7 @@ func commands() []command {
 		{name: "coverage", summary: "compute the coverage numbers of spec 04.5", milestone: "M0"},
 		{name: "depth", summary: "show the computed depth of a declaration and its reason", milestone: "M0"},
 		{name: "family", summary: "match, list or show the E0 families", milestone: "M1"},
-		{name: "volumes", summary: "check the volume map: modules with no home, prefixes with no module", milestone: "M0"},
+		{name: "volumes", summary: "check the volume map: modules with no home, prefixes with no module", run: runVolumes},
 		{name: "plan", summary: "run the planner role on a volume", milestone: "M1"},
 		{name: "informal", summary: "the E1 records and their checks", milestone: "M1"},
 		{name: "queue", summary: "print the work queue of a role, with the reason of each rank", milestone: "M1"},
@@ -44,7 +44,7 @@ func commands() []command {
 		{name: "edition", summary: "open, list or show an edition", milestone: "M0"},
 		{name: "report", summary: "write the weekly or the edition report", milestone: "M1"},
 		{name: "site", summary: "build, check or serve the site", milestone: "M0"},
-		{name: "check", summary: "check the map: the volume map, the families, the records and the books", milestone: "M0"},
+		{name: "check", summary: "check the map: the volume map, the families, the records and the books", run: runCheck},
 	}
 }
 
