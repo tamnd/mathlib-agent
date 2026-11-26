@@ -52,3 +52,20 @@ func TestNotWritten(t *testing.T) {
 		}
 	}
 }
+
+func TestQueueAndAgentUsage(t *testing.T) {
+	for _, args := range [][]string{
+		{"queue"},
+		{"queue", "-role", "nobody"},
+		{"queue", "-role", "writer", "-n", "-1"},
+		{"agent"},
+		{"agent", "run"},
+		{"agent", "run", "nobody"},
+		{"agent", "run", "writer", "-budget", "-1"},
+	} {
+		var out, errb bytes.Buffer
+		if code := run(args, &out, &errb); code != 2 {
+			t.Errorf("%v: exit code %d, want 2; %s", args, code, errb.String())
+		}
+	}
+}
