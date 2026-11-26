@@ -42,11 +42,11 @@ func (f *mapFlags) moduleList() ([]string, error) {
 	case f.mathlib != "":
 		return blueprint.Modules(f.mathlib)
 	case f.modules != "":
-		file, err := os.Open(f.modules)
+		file, err := os.Open(filepath.Clean(f.modules))
 		if err != nil {
 			return nil, err
 		}
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 		var out []string
 		s := bufio.NewScanner(file)
 		for s.Scan() {

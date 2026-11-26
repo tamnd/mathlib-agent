@@ -3,6 +3,7 @@ package blueprint
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -20,7 +21,7 @@ type Milestone struct {
 
 // LoadMilestones reads blueprint/milestones.yaml.
 func LoadMilestones(path string) ([]Milestone, error) {
-	b, err := os.ReadFile(path)
+	b, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return nil, err
 	}
