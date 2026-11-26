@@ -17,6 +17,8 @@ Each release has a section. The newest release is first.
 - `mlib coverage`. It writes `records/coverage.json` and `records/modules.json` from an index and the volume map.
 - `mlib site build` and `mlib site check`. The build writes mathlib.tamnd.com: one page for each module with an anchor for each declaration, the areas, the coverage, the drift and a lookup of a declaration by name. The check finds missing pages, broken internal links and files over the limits of Cloudflare.
 - `mlib sync`. It compares two indexes, puts each change in a drift class of spec 05.4 and writes `records/drift/<date>.json`.
+- `mlib edition new`, `mlib edition list` and `mlib edition show`. The new command opens an edition at a stable Mathlib tag `v4.X.0` and writes it to `records/editions.json` with the commit of the tag, the Lean version, the date of the tag and the commit of the branch `edition/v4.X.0` of mathlib-lean. If an edition is open, it closes as skipped. A patch tag does not open an edition.
+- `mlib check` also checks `records/editions.json` when the file exists.
 
 ### Fixed
 
