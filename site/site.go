@@ -21,11 +21,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/tamnd/mathlib-agent/internal/blueprint"
-	"github.com/tamnd/mathlib-agent/internal/coverage"
-	"github.com/tamnd/mathlib-agent/internal/depth"
-	"github.com/tamnd/mathlib-agent/internal/drift"
-	"github.com/tamnd/mathlib-agent/internal/index"
+	"github.com/tamnd/mathlib-agent/blueprint"
+	"github.com/tamnd/mathlib-agent/coverage"
+	"github.com/tamnd/mathlib-agent/depth"
+	"github.com/tamnd/mathlib-agent/drift"
+	"github.com/tamnd/mathlib-agent/index"
 	"github.com/yuin/goldmark"
 )
 

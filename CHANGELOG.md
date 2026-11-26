@@ -4,6 +4,10 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+### Changed
+
+- The packages move from `internal/` to the root of the module, so that other Go programs can import them. The README lists the packages.
+
 ## v0.0.2 - 2026-11-26
 
 ## v0.0.1 - 2026-11-26

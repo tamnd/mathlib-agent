@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tamnd/mathlib-agent/internal/depth"
-	"github.com/tamnd/mathlib-agent/internal/index"
+	"github.com/tamnd/mathlib-agent/depth"
+	"github.com/tamnd/mathlib-agent/index"
 )
 
 // The classes of spec 05.4 that the index can find. The classes visibility and silent come from the build, and curated from the curated lists.

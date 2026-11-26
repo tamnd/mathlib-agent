@@ -4,9 +4,9 @@ package coverage
 import (
 	"sort"
 
-	"github.com/tamnd/mathlib-agent/internal/blueprint"
-	"github.com/tamnd/mathlib-agent/internal/depth"
-	"github.com/tamnd/mathlib-agent/internal/index"
+	"github.com/tamnd/mathlib-agent/blueprint"
+	"github.com/tamnd/mathlib-agent/depth"
+	"github.com/tamnd/mathlib-agent/index"
 )
 
 // Counts are the declarations of a module or a volume by depth.
