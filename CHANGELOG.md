@@ -4,6 +4,8 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+## v0.1.1 - 2026-11-26
+
 ### Added
 
 - `mlib rename -from <commit> -to <commit>` makes one table of the renames and the module moves of the drift records between two commits, and rewrites the names in the section files of the handbook, the Lean files of the companion and the E1 records. It lists the changes, and writes them only with `-apply`. A rename from a type hash match needs `-proposals`.
