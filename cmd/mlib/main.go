@@ -36,7 +36,7 @@ func commands() []command {
 		{name: "depth", summary: "show the computed depth of a declaration and its reason", run: runDepth},
 		{name: "family", summary: "match, list or show the E0 families", run: runFamily},
 		{name: "volumes", summary: "check the volume map: modules with no home, prefixes with no module", run: runVolumes},
-		{name: "plan", summary: "run the planner role on a volume", milestone: "M1"},
+		{name: "plan", summary: "make the draft section plan of a volume", run: runPlan},
 		{name: "informal", summary: "the E1 records and their checks", milestone: "M1"},
 		{name: "queue", summary: "print the work queue of a role, with the reason of each rank", milestone: "M1"},
 		{name: "agent", summary: "run one role within the budget", milestone: "M1"},
