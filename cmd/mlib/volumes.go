@@ -14,6 +14,7 @@ import (
 	"github.com/tamnd/mathlib-agent/blueprint"
 	"github.com/tamnd/mathlib-agent/edition"
 	"github.com/tamnd/mathlib-agent/family"
+	"github.com/tamnd/mathlib-agent/informal"
 )
 
 // errFailed is a failed check. The details are already written. main exits with code 1.
@@ -197,6 +198,16 @@ func runCheck(args []string, stdout, stderr io.Writer) error {
 		} else {
 			fmt.Fprintf(stdout, "blueprint/families.yaml: %d families, 0 problems\n", len(fams))
 		}
+	}
+	files, _ := filepath.Glob(filepath.Join(f.mapDir, "informal", "*.jsonl"))
+	for _, file := range files {
+		rs, err := informal.Load(file)
+		if err != nil {
+			fmt.Fprintln(stdout, "informal:", err)
+			failed = true
+			continue
+		}
+		fmt.Fprintf(stdout, "informal/%s: %d records, 0 problems\n", filepath.Base(file), len(rs))
 	}
 	if eds, err := edition.Load(edition.Path(f.mapDir)); err != nil {
 		fmt.Fprintln(stdout, "records/editions.json:", err)

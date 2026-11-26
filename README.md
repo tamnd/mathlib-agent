@@ -33,6 +33,7 @@ The packages are at the root of the module, so other Go programs can import them
 | `drift` | compare two indexes and write the drift items (spec 05.4) |
 | `family` | read `blueprint/families.yaml` and give each declaration at most one E0 family (spec 09.4) |
 | `edition` | read and write the edition log `records/editions.json` (spec 05.7) |
+| `informal` | read and check the E1 records `informal/<vol>.jsonl`, find the stale ones and take a sample (spec 09.3, 14.3) |
 | `plan` | make the draft section plan of a volume (spec 09.1, 07.7) |
 | `site` | build and check the site mathlib.tamnd.com |
 
