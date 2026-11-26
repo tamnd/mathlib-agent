@@ -43,30 +43,36 @@ func runRename(args []string, stdout, stderr io.Writer) error {
 	}
 	table := rename.Table(chain, *proposals)
 	var changes []rename.Change
-	type write struct{ path, text string }
+	// A write keeps the root of its checkout, so that the walk, the read and the write cannot leave the checkout through a symbolic link.
+	type write struct {
+		root       *os.Root
+		path, text string
+	}
 	var writes []write
 	var records []func() error
-	walk := func(root, sub, ext string, fn func(path, src string) (string, []rename.Change)) error {
-		if root == "" {
+	walk := func(dir, sub, ext string, fn func(path, src string) (string, []rename.Change)) error {
+		if dir == "" {
 			return nil
 		}
-		base := filepath.Join(root, sub)
-		if _, err := os.Stat(base); errors.Is(err, fs.ErrNotExist) {
+		if _, err := os.Stat(filepath.Join(dir, sub)); errors.Is(err, fs.ErrNotExist) {
 			return nil
 		}
-		return filepath.WalkDir(base, func(path string, d fs.DirEntry, err error) error {
+		root, err := os.OpenRoot(dir)
+		if err != nil {
+			return err
+		}
+		return fs.WalkDir(root.FS(), sub, func(path string, d fs.DirEntry, err error) error {
 			if err != nil || d.IsDir() || !strings.HasSuffix(path, ext) {
 				return err
 			}
-			b, err := os.ReadFile(filepath.Clean(path))
+			b, err := root.ReadFile(path)
 			if err != nil {
 				return err
 			}
-			rel, _ := filepath.Rel(root, path)
-			out, ch := fn(rel, string(b))
+			out, ch := fn(path, string(b))
 			if len(ch) > 0 {
 				changes = append(changes, ch...)
-				writes = append(writes, write{path, out})
+				writes = append(writes, write{root, path, out})
 			}
 			return nil
 		})
@@ -122,7 +128,7 @@ func runRename(args []string, stdout, stderr io.Writer) error {
 		return nil
 	}
 	for _, w := range writes {
-		if err := os.WriteFile(w.path, []byte(w.text), 0o644); err != nil { //nolint:gosec // the path comes from a walk of the checkout that the user names
+		if err := w.root.WriteFile(w.path, []byte(w.text), 0o644); err != nil { //nolint:gosec // a file of the book is read by the site build, so others can read it
 			return err
 		}
 	}
