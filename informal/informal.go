@@ -38,6 +38,8 @@ type Record struct {
 	Run      string `json:"run,omitempty"`
 	Checks   Checks `json:"checks"`
 	Since    string `json:"since"`
+	// Formerly lists the old names of the declaration, after mlib rename (spec 05.4).
+	Formerly []string `json:"formerly,omitempty"`
 }
 
 // Path is the place of the records of a volume in a checkout of tamnd/mathlib.

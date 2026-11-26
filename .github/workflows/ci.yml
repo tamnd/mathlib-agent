@@ -112,11 +112,11 @@ jobs:
           code=0
           "$RUNNER_TEMP/mlib" frobnicate || code=$?
           test "$code" = 2
-      - name: a command that is not written yet exits with code 3
+      - name: a command without its arguments exits with code 2
         run: |
           code=0
-          "$RUNNER_TEMP/mlib" rename || code=$?
-          test "$code" = 3
+          "$RUNNER_TEMP/mlib" report || code=$?
+          test "$code" = 2
 
   workflows:
     name: writing rules and workflow lint

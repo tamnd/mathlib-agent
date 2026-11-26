@@ -6,6 +6,9 @@ Each release has a section. The newest release is first.
 
 ### Added
 
+- `mlib rename -from <commit> -to <commit>` makes one table of the renames and the module moves of the drift records between two commits, and rewrites the names in the section files of the handbook, the Lean files of the companion and the E1 records. It lists the changes, and writes them only with `-apply`. A rename from a type hash match needs `-proposals`.
+- `mlib report -week <week>` and `mlib report -edition <tag>` write the weekly report and the edition report from the records of the map. The weekly report gives an alert when the last sync is more than 30 days old.
+- An E1 record can keep the old names of its declaration in `formerly`.
 - `mlib queue -role <role>` prints the work queue of a role with the rank of spec 11.5 and the reason of each rank. The planner takes the volumes with no section plan. The informalizer takes the modules with E1 declarations that have no fresh record, in the order of the volumes. The family role takes the E1 declarations with no family, in groups by the end of the name. The writer takes the planned sections of an accepted plan. The exampler, the exerciser and the checker take the drafted sections, and the refresher takes the stale sections.
 - `mlib agent run <role>` writes the run record and the prompt of the top item, applies the budget of `agent.yaml` and the ledger, and starts the command of `MLIB_RUNNER` with the prompt on stdin. A role with a small model goes to the large model after two failed runs. The checker refuses the model of the writer of the same section. The prompts of the nine roles are in `prompts/`.
 - `blueprint/milestones.yaml` can give the date when a milestone closed and the volumes that it works on. The queue uses them for the weight of a volume.
@@ -13,6 +16,10 @@ Each release has a section. The newest release is first.
 - `mlib plan -volume V13` makes the draft section plan of a volume and writes it to `blueprint/sections/V13.yaml` with `-write`. The chapters come from the prefixes of the volume. A prefix with more than 40 modules splits by its next folder, and small groups join until a chapter has about 20 pages. A section takes modules until it has about 10 pages, with the estimates of spec 04.7. Each section has its modules, the E3 and E2 lists, the families, the requires edges and the counts by depth. The command does not write over a plan with the status `accepted`.
 - `mlib family match`, `mlib family list` and `mlib family show`. They read `blueprint/families.yaml` and give each declaration the first family whose pattern it matches. A pattern can test the end of the name, the kind, an attribute, a constant that the declaration uses, a text of the type, a deprecated alias, and an additive or order dual twin. A twin must have the type of its source after the swaps of words and symbols. `mlib family match -out` writes `records/families.json`.
 - `mlib check` also checks `blueprint/families.yaml`.
+
+### Changed
+
+- Each command of spec 11.1 is now written, so no command exits with code 3.
 
 ## v0.1.0 - 2026-11-26
 

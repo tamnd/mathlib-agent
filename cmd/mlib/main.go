@@ -40,9 +40,9 @@ func commands() []command {
 		{name: "informal", summary: "the E1 records and their checks", run: runInformal},
 		{name: "queue", summary: "print the work queue of a role, with the reason of each rank", run: runQueue},
 		{name: "agent", summary: "run one role within the budget", run: runAgent},
-		{name: "rename", summary: "rewrite deprecated names in the handbook and the companion", milestone: "M1"},
+		{name: "rename", summary: "rewrite deprecated names in the handbook and the companion", run: runRename},
 		{name: "edition", summary: "open, list or show an edition", run: runEdition},
-		{name: "report", summary: "write the weekly or the edition report", milestone: "M1"},
+		{name: "report", summary: "write the weekly or the edition report", run: runReport},
 		{name: "site", summary: "build or check the site", run: runSite},
 		{name: "check", summary: "check the map: the volume map, the families, the records and the books", run: runCheck},
 	}
