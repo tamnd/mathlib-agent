@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"net/url"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -47,28 +46,32 @@ func Check(dir, base string) (CheckReport, error) {
 		base = "/"
 	}
 	var r CheckReport
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return r, err
+	}
+	defer func() { _ = root.Close() }()
+	fsys := root.FS()
+	exists := func(rel string) bool {
+		_, err := fs.Stat(fsys, rel)
+		return err == nil
+	}
 	for _, p := range Required {
-		if _, err := os.Stat(filepath.Join(dir, filepath.FromSlash(p))); err != nil {
+		if !exists(p) {
 			r.Problems = append(r.Problems, Problem{p, "the page is missing"})
 		}
 	}
 	for i := 0; i < Shards; i++ {
 		p := fmt.Sprintf("decl/shard/%02x.json", i)
-		if _, err := os.Stat(filepath.Join(dir, filepath.FromSlash(p))); err != nil {
+		if !exists(p) {
 			r.Problems = append(r.Problems, Problem{p, "the shard is missing"})
 		}
 	}
-	exists := func(rel string) bool {
-		_, err := os.Stat(filepath.Join(dir, filepath.FromSlash(rel)))
-		return err == nil
-	}
-	err := filepath.WalkDir(dir, func(p string, d fs.DirEntry, err error) error {
+	err = fs.WalkDir(fsys, ".", func(rel string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return err
 		}
 		r.Files++
-		rel, _ := filepath.Rel(dir, p)
-		rel = filepath.ToSlash(rel)
 		info, err := d.Info()
 		if err != nil {
 			return err
@@ -80,7 +83,7 @@ func Check(dir, base string) (CheckReport, error) {
 			return nil
 		}
 		r.Pages++
-		data, err := os.ReadFile(filepath.Clean(p))
+		data, err := fs.ReadFile(fsys, rel)
 		if err != nil {
 			return err
 		}
@@ -105,7 +108,7 @@ func Check(dir, base string) (CheckReport, error) {
 			if target == "" || strings.HasSuffix(target, "/") {
 				target += "index.html"
 			}
-			if !exists(target) {
+			if !fs.ValidPath(target) || !exists(target) {
 				r.Problems = append(r.Problems, Problem{rel, "a link has no target: " + link})
 			}
 		}
