@@ -289,7 +289,7 @@ func writeJSON(path string, v any) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil { //nolint:gosec // the path comes from the -out flag of the user
 		return err
 	}
-	return os.WriteFile(filepath.Clean(path), append(b, '\n'), 0o600)
+	return os.WriteFile(path, append(b, '\n'), 0o600) //nolint:gosec // the path comes from the -out flag of the user
 }
 
 func runCoverage(args []string, stdout, stderr io.Writer) error {

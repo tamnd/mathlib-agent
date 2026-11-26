@@ -34,7 +34,7 @@ func commands() []command {
 		{name: "sync", summary: "compare a new index with the last one and write the drift, the depths and the modules", run: runSync},
 		{name: "coverage", summary: "compute the coverage numbers of spec 04.5", run: runCoverage},
 		{name: "depth", summary: "show the computed depth of a declaration and its reason", run: runDepth},
-		{name: "family", summary: "match, list or show the E0 families", milestone: "M1"},
+		{name: "family", summary: "match, list or show the E0 families", run: runFamily},
 		{name: "volumes", summary: "check the volume map: modules with no home, prefixes with no module", run: runVolumes},
 		{name: "plan", summary: "run the planner role on a volume", milestone: "M1"},
 		{name: "informal", summary: "the E1 records and their checks", milestone: "M1"},
