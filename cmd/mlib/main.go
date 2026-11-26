@@ -30,10 +30,10 @@ type command struct {
 func commands() []command {
 	return []command{
 		{name: "version", summary: "print the version of mlib", run: runVersion},
-		{name: "index", summary: "download or read the index of Mathlib at a commit", milestone: "M0"},
-		{name: "sync", summary: "compare a new index with the last one and write the drift, the depths and the modules", milestone: "M0"},
-		{name: "coverage", summary: "compute the coverage numbers of spec 04.5", milestone: "M0"},
-		{name: "depth", summary: "show the computed depth of a declaration and its reason", milestone: "M0"},
+		{name: "index", summary: "download or read the index of Mathlib at a commit", run: runIndex},
+		{name: "sync", summary: "compare a new index with the last one and write the drift, the depths and the modules", run: runSync},
+		{name: "coverage", summary: "compute the coverage numbers of spec 04.5", run: runCoverage},
+		{name: "depth", summary: "show the computed depth of a declaration and its reason", run: runDepth},
 		{name: "family", summary: "match, list or show the E0 families", milestone: "M1"},
 		{name: "volumes", summary: "check the volume map: modules with no home, prefixes with no module", run: runVolumes},
 		{name: "plan", summary: "run the planner role on a volume", milestone: "M1"},
