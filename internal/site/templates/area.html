@@ -1,0 +1,20 @@
+{{define "area"}}
+<header class="page-head">
+  <p class="crumbs"><a href="{{url "area/"}}">The areas</a> / {{.Data.Part}}</p>
+  <h1>{{.Data.ID}}. {{.Data.Title}}</h1>
+  <p class="lead">{{num .Data.Decls}} declarations in {{num .Data.Modules}} modules. Level: {{.Data.Level}}.</p>
+</header>
+<table class="facts">
+  <tr><th>Depths</th><td>E3 {{num .Data.E3}}, E2 {{num .Data.E2}}, E1 {{num .Data.E1}}, E0 {{num .Data.E0}}</td></tr>
+  <tr><th>Prefixes</th><td>{{range $i, $p := .Data.Prefixes}}{{if $i}}, {{end}}<code>{{$p}}</code>{{end}}</td></tr>
+</table>
+<h2>The modules</h2>
+<input class="filter" type="search" placeholder="Filter the modules" aria-label="Filter the modules">
+<table class="list">
+  <thead><tr><th>Module</th><th class="n">Declarations</th><th class="n">E3</th><th class="n">E2</th></tr></thead>
+  <tbody>
+    {{range .Data.Rows}}<tr><td><a href="{{url (print "module/" .Module "/")}}"><code>{{.Module}}</code></a></td><td class="n">{{num .Decls}}</td><td class="n">{{num .E3}}</td><td class="n">{{num .E2}}</td></tr>
+    {{end}}
+  </tbody>
+</table>
+{{end}}

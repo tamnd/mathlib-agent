@@ -1,0 +1,11 @@
+{{define "decl"}}
+<header class="page-head">
+  <h1>Go to a declaration</h1>
+  <p class="lead">Give the full name of a declaration, for example <code>Nat.add_comm</code>. The page of its module opens at the declaration. The address <code>/decl/Nat.add_comm/</code> does the same.</p>
+</header>
+<form class="lookup" action="{{url "decl/"}}" role="search">
+  <input id="lookup" type="search" name="q" placeholder="Nat.add_comm" aria-label="The full name of a declaration" autocomplete="off" spellcheck="false">
+</form>
+<p id="lookup-status" class="muted" role="status"></p>
+<p class="muted">The lookup needs a script. With no script, open <a href="{{url "module/"}}">the list of modules</a>.</p>
+{{end}}

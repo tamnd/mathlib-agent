@@ -43,7 +43,7 @@ func commands() []command {
 		{name: "rename", summary: "rewrite deprecated names in the handbook and the companion", milestone: "M1"},
 		{name: "edition", summary: "open, list or show an edition", milestone: "M0"},
 		{name: "report", summary: "write the weekly or the edition report", milestone: "M1"},
-		{name: "site", summary: "build, check or serve the site", milestone: "M0"},
+		{name: "site", summary: "build or check the site", run: runSite},
 		{name: "check", summary: "check the map: the volume map, the families, the records and the books", run: runCheck},
 	}
 }

@@ -1,0 +1,14 @@
+{{define "modules"}}
+<header class="page-head">
+  <h1>The modules</h1>
+  <p class="lead">Mathlib has {{num (len .Data)}} modules. Each one has a page with its module docstring and its declarations.</p>
+</header>
+<input class="filter" type="search" placeholder="Filter the modules" aria-label="Filter the modules">
+<table class="list">
+  <thead><tr><th>Module</th><th>Volume</th><th class="n">Declarations</th></tr></thead>
+  <tbody>
+    {{range .Data}}<tr><td><a href="{{url (print "module/" .Module "/")}}"><code>{{.Module}}</code></a></td><td>{{.Volume}}</td><td class="n">{{num .Decls}}</td></tr>
+    {{end}}
+  </tbody>
+</table>
+{{end}}

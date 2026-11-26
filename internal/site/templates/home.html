@@ -1,0 +1,31 @@
+{{define "home"}}
+<section class="hero">
+  <p class="eyebrow">The Mathlib Handbook</p>
+  <h1>A textbook of all the mathematics in Mathlib</h1>
+  <p class="lead">The handbook explains each declaration of Mathlib at a depth that fits its role. The main definitions and theorems get a full treatment with proofs and examples. The other declarations get a short proof, one sentence or a place in a family. The text follows Mathlib <code>master</code>, and each stable Mathlib tag gives an edition in PDF and EPUB.</p>
+  <p class="hero-links"><a class="button primary" href="{{url "area/"}}">See the areas</a> <a class="button" href="{{url "coverage/"}}">See the coverage</a> <a class="button" href="{{url "decl/"}}">Go to a declaration</a></p>
+</section>
+
+<section aria-labelledby="counts-h">
+  <h2 id="counts-h">Mathlib now</h2>
+  <ul class="counts">
+    <li><span class="n">{{num .Data.Decls}}</span> <span class="what">declarations</span></li>
+    <li><span class="n">{{num .Data.Modules}}</span> <span class="what">modules</span></li>
+    <li><span class="n">{{len .Data.Volumes}}</span> <span class="what">volumes</span></li>
+    <li><span class="n">{{num .Data.E3}}</span> <span class="what">at depth E3</span></li>
+    <li><span class="n">{{num .Data.E2}}</span> <span class="what">at depth E2</span></li>
+    <li><span class="n">{{num .Data.E1}}</span> <span class="what">at depth E1</span></li>
+    <li><span class="n">{{num .Data.E0}}</span> <span class="what">at depth E0</span></li>
+    <li><span class="n">{{num .Data.Aliases}}</span> <span class="what">deprecated aliases</span></li>
+  </ul>
+  <p class="muted">A rule gives each declaration its depth (spec 04.4). E3 is a full textbook treatment, E2 a statement with a short proof, E1 one sentence and E0 a member of a family. People can change a depth and give a reason.</p>
+</section>
+
+<section aria-labelledby="vols-h">
+  <h2 id="vols-h">The volumes</h2>
+  <ul class="tiles">
+    {{range .Data.Volumes}}<li><a href="{{url (print "area/" .ID "/")}}"><span class="tile-name">{{.ID}}. {{.Title}}</span> <span class="tile-count">{{num .Decls}} declarations in {{num .Modules}} modules</span></a></li>
+    {{end}}
+  </ul>
+</section>
+{{end}}
