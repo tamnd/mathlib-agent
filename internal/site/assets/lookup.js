@@ -29,7 +29,7 @@
       if (mod) {
         location.replace(base + "module/" + mod + "/#" + encodeURIComponent(name));
       } else {
-        say("No declaration of this index has the name " + name + ". Give the full name, for example Nat.add_comm.");
+        say("No declaration of this index has the name " + name + ". The index has only the declarations of Mathlib modules. A name of core Lean or Batteries is not in it. Give the full name, for example Nat.Prime.two_le.");
       }
     }).catch(function () { say("The lookup table did not load."); });
   }

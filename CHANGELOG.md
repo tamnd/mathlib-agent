@@ -15,3 +15,7 @@ Each release has a section. The newest release is first.
 - `mlib coverage`. It writes `records/coverage.json` and `records/modules.json` from an index and the volume map.
 - `mlib site build` and `mlib site check`. The build writes mathlib.tamnd.com: one page for each module with an anchor for each declaration, the areas, the coverage, the drift and a lookup of a declaration by name. The check finds missing pages, broken internal links and files over the limits of Cloudflare.
 - `mlib sync`. It compares two indexes, puts each change in a drift class of spec 05.4 and writes `records/drift/<date>.json`.
+
+### Fixed
+
+- The lookup page gave `Nat.add_comm` as its example. This name is in core Lean, so the index does not have it. The example is now `Nat.Prime.two_le`, and the text tells the reader that names of core Lean and Batteries are not in the index.
