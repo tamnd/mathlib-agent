@@ -1,0 +1,31 @@
+{{define "module"}}
+<article class="node">
+<header class="node-head">
+  <p class="crumbs"><a href="{{url "area/"}}">The areas</a> / {{if eq .Data.Volume.ID "none"}}No home volume{{else}}<a href="{{url (print "area/" .Data.Volume.ID "/")}}">{{.Data.Volume.ID}}. {{.Data.Volume.Title}}</a>{{end}}</p>
+  <h1><code>{{.Data.Module}}</code></h1>
+  <p class="lead">{{num (len .Data.Decls)}} declarations{{with .Data.Aliases}} and {{len .}} deprecated aliases{{end}}. <a href="{{docsURL .Data.Module ""}}">Mathlib docs</a> · <a href="{{srcURL .Data.Module 0}}">Source</a></p>
+</header>
+{{if .Data.Docs}}<div class="module-doc prose">
+{{range .Data.Docs}}{{md .}}
+{{end}}</div>
+{{end}}
+<section class="decls" aria-label="The declarations">
+{{range .Data.Decls}}<section class="decl" id="{{.Name}}">
+<h2 class="decl-head"><span class="kind">{{.Kind}}</span> <code>{{.Name}}</code> <span class="depth {{.Depth}}" title="{{.Reason}}">{{.Depth}}</span> <a class="self" href="#{{.Name}}" aria-label="Link to {{.Name}}">#</a></h2>
+{{with .Type}}<pre class="type"><code>{{.}}</code></pre>
+{{end}}{{with .Doc}}<div class="prose">{{md .}}</div>
+{{end}}<p class="links">{{with .Attrs}}<span class="attrs">{{range $i, $a := .}}{{if $i}}, {{end}}@[{{$a}}]{{end}}</span> · {{end}}<a href="{{docsURL .Module .Name}}">docs</a> · <a href="{{srcURL .Module .Line}}">source</a></p>
+</section>
+{{end}}</section>
+{{with .Data.Aliases}}<section class="decls" aria-labelledby="aliases-h">
+<h2 id="aliases-h">Deprecated aliases</h2>
+<table class="list">
+  <thead><tr><th>Name</th><th>New name</th><th>Since</th></tr></thead>
+  <tbody>
+  {{range .}}<tr id="{{.Name}}"><td><code>{{.Name}}</code></td><td>{{with .Target}}<a href="{{url (print "decl/" . "/")}}"><code>{{.}}</code></a>{{end}}</td><td>{{.Since}}</td></tr>
+  {{end}}</tbody>
+</table>
+</section>
+{{end}}
+</article>
+{{end}}

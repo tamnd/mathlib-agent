@@ -1,0 +1,37 @@
+{{define "drift"}}
+<header class="page-head">
+  <h1>Drift</h1>
+  <p class="lead">Each sync compares the index of a new Mathlib commit with the last one, and writes a drift record (spec 05.4). A record lists the added, removed, renamed and changed declarations, and the moved modules.</p>
+</header>
+{{if .Data}}
+<table class="list">
+  <thead><tr><th>Date</th><th>From</th><th>To</th><th class="n">Changes</th><th class="n">Breaking</th></tr></thead>
+  <tbody>
+    {{range .Data}}<tr><td><a href="{{url (print "drift/" .Date "/")}}">{{.Date}}</a></td><td><code>{{short .From}}</code></td><td><code>{{short .To}}</code></td><td class="n">{{num (len .Items)}}</td><td class="n">{{num .Breaking}}</td></tr>
+    {{end}}
+  </tbody>
+</table>
+{{else}}
+<p class="notice">No drift record exists yet. The first record comes from the first sync after the first index.</p>
+{{end}}
+{{end}}
+
+{{define "driftday"}}
+<header class="page-head">
+  <p class="crumbs"><a href="{{url "drift/"}}">Drift</a></p>
+  <h1>Drift on {{.Data.Date}}</h1>
+  <p class="lead">From Mathlib <code>{{short .Data.From}}</code> to <code>{{short .Data.To}}</code>{{if ne (index .Data.Toolchain 0) (index .Data.Toolchain 1)}}, and from Lean {{index .Data.Toolchain 0}} to {{index .Data.Toolchain 1}}{{end}}.</p>
+</header>
+<ul class="chips">
+  {{range $k, $v := .Data.Counts}}<li>{{$k}}: {{num $v}}</li>
+  {{end}}
+</ul>
+<input class="filter" type="search" placeholder="Filter the changes" aria-label="Filter the changes">
+<table class="list">
+  <thead><tr><th>Class</th><th>Name</th><th>To</th><th>Severity</th><th>Note</th></tr></thead>
+  <tbody>
+    {{range .Data.Items}}<tr><td>{{.Class}}</td><td><code>{{.Name}}</code></td><td>{{with .To}}<code>{{.}}</code>{{end}}</td><td>{{.Severity}}</td><td>{{.Note}}</td></tr>
+    {{end}}
+  </tbody>
+</table>
+{{end}}

@@ -1,0 +1,44 @@
+/* The style of mathlib.tamnd.com that Math 2.0 does not have. site.css loads first and gives the tokens, the fonts, the page frame and the themes. This file adds the claim bar, the counts, the depth marks and the declarations of a module page. */
+
+.claim-bar { background: var(--warn); color: var(--text); font-size: 0.9rem; padding: 0.45rem 1.25rem; text-align: center; }
+.claim-bar a { color: inherit; text-decoration: underline; text-underline-offset: 0.18em; }
+
+/* The counts of the main page. */
+.counts { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: 0.6rem; padding: 0; margin: 0 0 1.5rem; }
+.counts li { background: var(--surface); padding: 0.8rem 1rem; }
+.counts .n { display: block; font-size: 1.6rem; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.counts .what { color: var(--muted); font-size: 0.9rem; }
+
+/* The depth of a declaration (spec 04.1). */
+.depth { display: inline-block; font-size: 0.75rem; font-weight: 650; letter-spacing: 0.04em; padding: 0.05rem 0.45rem; background: var(--surface); color: var(--muted); vertical-align: middle; }
+.depth.E3 { background: hsl(var(--hue) 60% 45%); color: #fff; }
+.depth.E2 { background: hsl(var(--hue) 40% 75%); color: #111; }
+
+/* Numbers in the tables. */
+.list td.n, .list th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.list code { background: none; padding: 0; overflow-wrap: anywhere; }
+
+/* The declarations of a module page. */
+.module-doc { margin-bottom: 2rem; }
+.decls { margin-top: 2rem; }
+.decl { padding: 1rem 0 1.1rem; border-top: 1px solid var(--surface); scroll-margin-top: 4.5rem; }
+.decl:target { background: var(--surface); padding-left: 0.8rem; padding-right: 0.8rem; }
+.decl-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; margin: 0 0 0.4rem; font-size: 1rem; font-weight: 600; }
+.decl-head .kind { color: var(--muted); font-weight: 550; font-size: 0.88rem; }
+.decl-head code { background: none; padding: 0; overflow-wrap: anywhere; font-size: 0.95rem; }
+.decl-head a.self { color: var(--muted); text-decoration: none; font-weight: 400; }
+.decl pre.type { margin: 0.3rem 0 0.6rem; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.86rem; }
+.decl .prose { font-size: 0.96rem; }
+.decl .links { margin: 0.4rem 0 0; font-size: 0.85rem; color: var(--muted); }
+.decl .links a { color: var(--muted); }
+.decl .attrs { color: var(--muted); font-size: 0.85rem; }
+
+/* The lookup of a declaration. */
+.lookup input { width: 100%; max-width: 36rem; font: inherit; padding: 0.55rem 0.8rem; border: 1px solid var(--muted); background: var(--bg); color: var(--text); }
+#lookup-status { min-height: 1.5rem; }
+
+/* A docstring is Markdown, and its headings start at h1. Keep them below the title of the page. */
+.module-doc h1, .decl .prose h1 { font-size: 1.45rem; margin: 1.6rem 0 0.6rem; }
+.module-doc h2, .decl .prose h2 { font-size: 1.2rem; }
+.module-doc h3, .decl .prose h3, .module-doc h4, .decl .prose h4 { font-size: 1.05rem; }
+.node-head h1 code { background: none; padding: 0; overflow-wrap: anywhere; }

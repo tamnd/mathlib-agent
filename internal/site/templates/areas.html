@@ -1,0 +1,18 @@
+{{define "areas"}}
+<header class="page-head">
+  <h1>The areas</h1>
+  <p class="lead">The handbook has 35 volumes. The volume map gives each module of Mathlib one home volume, by the longest matching path prefix. A volume is an area of mathematics, not a folder of Mathlib.</p>
+</header>
+{{range .Data.Parts}}
+<section>
+  <h2>{{.Name}}</h2>
+  <table class="list">
+    <thead><tr><th>Volume</th><th>Level</th><th class="n">Modules</th><th class="n">Declarations</th><th class="n">E3</th><th class="n">E2</th></tr></thead>
+    <tbody>
+      {{range .Volumes}}<tr><td><a href="{{url (print "area/" .ID "/")}}">{{.ID}}. {{.Title}}</a></td><td>{{.Level}}</td><td class="n">{{num .Modules}}</td><td class="n">{{num .Decls}}</td><td class="n">{{num .E3}}</td><td class="n">{{num .E2}}</td></tr>
+      {{end}}
+    </tbody>
+  </table>
+</section>
+{{end}}
+{{end}}

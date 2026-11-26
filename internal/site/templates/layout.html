@@ -1,0 +1,83 @@
+{{define "layout"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{if .Title}}{{.Title}} · {{.Site.Name}}{{else}}{{.Site.Name}} · a textbook of Mathlib{{end}}</title>
+<meta name="description" content="{{.Description}}">
+<meta name="color-scheme" content="light dark">
+<meta property="og:site_name" content="{{.Site.Name}}">
+<meta property="og:type" content="{{if .Title}}article{{else}}website{{end}}">
+<meta property="og:url" content="{{canonical .Path}}">
+<meta property="og:title" content="{{if .Title}}{{.Title}}{{else}}{{.Site.Name}}{{end}}">
+<meta property="og:description" content="{{.Description}}">
+<meta name="twitter:card" content="summary">
+{{if not .NoIndex}}<link rel="canonical" href="{{canonical .Path}}">
+{{end}}<link rel="alternate" type="text/plain" title="llms.txt" href="{{url "llms.txt"}}">
+<link rel="icon" href="{{url "assets/icon.svg"}}" type="image/svg+xml">
+<link rel="preload" href="{{url "assets/fonts/InterVariable.woff2"}}" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{url "assets/site.css"}}">
+<link rel="stylesheet" href="{{url "assets/mathlib.css"}}">
+<script>document.documentElement.dataset.theme = localStorage.getItem("m2-theme") || "";</script>
+<script defer src="{{url "assets/site.js"}}"></script>
+{{if .Lookup}}<script defer src="{{url "assets/lookup.js"}}"></script>
+{{end}}</head>
+<body data-base="{{url ""}}" class="s-{{if .Section}}{{.Section}}{{else}}none{{end}}">
+<a class="skip" href="#content">Skip to the content</a>
+<header class="top">
+  <a class="brand" href="{{url ""}}" aria-label="{{.Site.Name}}, main page"><img src="{{url "assets/icon.svg"}}" alt="" width="26" height="26"><span>{{.Site.Name}}</span></a>
+  <nav class="main-nav" aria-label="Main">
+    {{range .Site.Menu}}<a href="{{url .Path}}"{{if eq $.Section .Section}} aria-current="page"{{end}} title="{{.Question}}">{{.Text}}</a>
+    {{end}}
+  </nav>
+  <form class="search-box" action="{{url "decl/"}}" role="search">
+    <input type="search" name="q" placeholder="Go to a declaration" aria-label="Go to a declaration" autocomplete="off" spellcheck="false">
+  </form>
+  <button class="theme" type="button" aria-label="Change the colour theme" title="Change the colour theme"><span aria-hidden="true">◐</span></button>
+</header>
+<p class="claim-bar">The volumes of the handbook are not written yet. This site shows the map of Mathlib that they will follow, at <a href="{{mathlibTree}}">Mathlib {{short .Site.Mathlib}}</a>.</p>
+<main id="content">
+{{.Content}}
+</main>
+<footer class="bottom">
+  <div class="foot-cols">
+    <section>
+      <h2>Read</h2>
+      <ul>
+        <li><a href="{{url "area/"}}">The areas</a></li>
+        <li><a href="{{url "module/"}}">The modules</a></li>
+        <li><a href="{{url "decl/"}}">Go to a declaration</a></li>
+      </ul>
+    </section>
+    <section>
+      <h2>Records</h2>
+      <ul>
+        <li><a href="{{url "coverage/"}}">Coverage</a></li>
+        <li><a href="{{url "drift/"}}">Drift</a></li>
+        <li><a href="https://github.com/tamnd/mathlib/releases/tag/index">The index assets</a></li>
+      </ul>
+    </section>
+    <section>
+      <h2>Project</h2>
+      <ul>
+        <li><a href="https://github.com/tamnd/mathlib">The map on GitHub</a></li>
+        <li><a href="https://github.com/tamnd/mathlib-lean">The Lean companion</a></li>
+        <li><a href="https://github.com/tamnd/mathlib-agent">The toolchain</a></li>
+        <li><a href="https://github.com/tamnd/mathlib-handbook">The handbook</a></li>
+      </ul>
+    </section>
+    <section>
+      <h2>For machines</h2>
+      <ul>
+        <li><a href="{{url "llms.txt"}}">llms.txt</a></li>
+        <li><a href="{{url "api/coverage.json"}}">The coverage as JSON</a></li>
+        <li><a href="{{url "api/volumes.json"}}">The volumes as JSON</a></li>
+        <li><a href="{{url "sitemap.xml"}}">Sitemap</a></li>
+      </ul>
+    </section>
+  </div>
+  <p class="fine">The text is under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, the records under CC0 and the toolchain under MIT. The names, the types and the docstrings come from <a href="https://github.com/leanprover-community/mathlib4">Mathlib</a>, under Apache-2.0. The index is of Mathlib <a href="{{mathlibTree}}">{{short .Site.Mathlib}}</a> with Lean {{.Site.Toolchain}}, written {{.Site.IndexDate}}. Built by mlib {{.Site.Version}}{{with .Site.Built}} on {{.}}{{end}}. The style comes from <a href="https://math2.tamnd.com">Math 2.0</a>.</p>
+</footer>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,29 @@
+{{define "coverage"}}
+<header class="page-head">
+  <h1>Coverage</h1>
+  <p class="lead">The coverage numbers of spec 04.5, for Mathlib {{short .Data.Mathlib}} on {{.Data.Date}}. No section of the handbook exists yet, so C-home and C-depth are 0%. The numbers go up as the volumes are written.</p>
+</header>
+<table class="facts">
+  <tr><th>Declarations</th><td>{{num .Data.Total.Decls}}</td></tr>
+  <tr><th>Aliases</th><td>{{num .Data.Aliases}} deprecated aliases. They do not count as declarations.</td></tr>
+  <tr><th>Orphans</th><td>{{num .Data.Orphans}} declarations with no home volume.</td></tr>
+</table>
+<h2>By volume</h2>
+<table class="list">
+  <thead><tr><th>Volume</th><th class="n">Modules</th><th class="n">Declarations</th><th class="n">E3</th><th class="n">E2</th><th class="n">E1</th><th class="n">E0</th><th class="n">C-home</th><th class="n">C-depth</th><th class="n">C-E3</th></tr></thead>
+  <tbody>
+    {{range .Data.Volumes}}{{template "covrow" .}}{{end}}
+  </tbody>
+  <tfoot>{{template "covrow" .Data.Total}}</tfoot>
+</table>
+<h2>The numbers</h2>
+<ul>
+  <li>C-home is the share of declarations that have a home section.</li>
+  <li>C-depth is the share of declarations that the handbook explains at the depth of the rule or higher.</li>
+  <li>C-E3 is the share of the E3 candidates that have a full treatment. It is empty when a volume has no E3 candidate.</li>
+</ul>
+<p>The data is also at <a href="{{url "api/coverage.json"}}">api/coverage.json</a>.</p>
+{{end}}
+
+{{define "covrow"}}<tr><td>{{if eq .Volume "all"}}All{{else}}<a href="{{url (print "area/" .Volume "/")}}">{{.Volume}}. {{.Title}}</a>{{end}}</td><td class="n">{{num .Modules}}</td><td class="n">{{num .Decls}}</td><td class="n">{{num (index .Depth "E3")}}</td><td class="n">{{num (index .Depth "E2")}}</td><td class="n">{{num (index .Depth "E1")}}</td><td class="n">{{num (index .Depth "E0")}}</td><td class="n">{{pct .CHome}}</td><td class="n">{{pct .CDepth}}</td><td class="n">{{with .CE3}}{{pct .}}{{end}}</td></tr>
+{{end}}
