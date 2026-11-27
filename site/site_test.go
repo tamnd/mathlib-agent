@@ -11,6 +11,7 @@ import (
 	"github.com/tamnd/mathlib-agent/depth"
 	"github.com/tamnd/mathlib-agent/drift"
 	"github.com/tamnd/mathlib-agent/index"
+	"github.com/tamnd/mathlib-agent/teach"
 )
 
 const testMap = `
@@ -133,5 +134,59 @@ func TestNum(t *testing.T) {
 		if got := num(n); got != want {
 			t.Errorf("num(%d) = %s, want %s", n, got, want)
 		}
+	}
+}
+
+func TestTeach(t *testing.T) {
+	in := testInput(t)
+	in.Paths = []teach.Path{
+		{ID: "U", Title: "The undergraduate core", For: "an undergraduate degree", Steps: []teach.Step{{Volume: "V04", Chapters: []int{1, 1}}, {Volume: "V99"}}},
+		{ID: "A", Title: "Algebra", For: "an algebraist", After: []string{"U"}, Steps: []teach.Step{{Volume: "V04"}}},
+	}
+	in.Book = teach.Book{"V04": &teach.Volume{ID: "V04", Title: "Order and lattices", Chapters: []*teach.Chapter{
+		{N: 1, Title: "Orders", Sections: []*teach.Section{{ID: "V04.C01.S01", Title: "Preorders", Status: "drafted", Exercises: []teach.Exercise{{N: 1, Grade: "A", Text: "Show that ≤ is reflexive."}, {N: 2, Grade: "L", Text: "Prove it in Lean."}}}}},
+		{N: 2, Title: "Monotone maps", Sections: []*teach.Section{{ID: "V04.C02.S01", Title: "Monotone", Status: "checked", Exercises: []teach.Exercise{{N: 1, Grade: "C", Text: "A hard one."}}}}},
+	}}}
+	out := filepath.Join(t.TempDir(), "public")
+	if _, err := Build(in, Config{Out: out, URL: "https://mathlib.tamnd.com", Version: "test"}); err != nil {
+		t.Fatal(err)
+	}
+	r, err := Check(out, "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(r.Problems) > 0 {
+		t.Fatalf("problems: %v", r.Problems)
+	}
+	read := func(p string) string {
+		b, err := os.ReadFile(filepath.Join(out, filepath.FromSlash(p)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return string(b)
+	}
+	u := read("teach/U/index.html")
+	for _, want := range []string{"Ch. 1 to 1", "not written yet", "1. Orders", "1 drafted", `href="/teach/exercises/V04/"`} {
+		if !strings.Contains(u, want) {
+			t.Errorf("the page of path U has no %q", want)
+		}
+	}
+	if strings.Contains(u, "Monotone maps") {
+		t.Error("path U takes chapter 2 of V04")
+	}
+	if a := read("teach/A/index.html"); !strings.Contains(a, `href="/teach/U/"`) || !strings.Contains(a, "Monotone maps") {
+		t.Error("the page of path A has no link to U or no chapter 2")
+	}
+	ex := read("teach/exercises/V04/index.html")
+	for _, want := range []string{"Grade A: routine", "Grade C: hard", "Grade L: in Lean", "V04.C01.S01, exercise 1", "Show that ≤ is reflexive."} {
+		if !strings.Contains(ex, want) {
+			t.Errorf("the exercises page has no %q", want)
+		}
+	}
+	if strings.Contains(ex, "Grade B") {
+		t.Error("the exercises page has a grade with no exercise")
+	}
+	if h := read("teach/index.html"); !strings.Contains(h, `href="/teach/A/"`) || !strings.Contains(read("index.html"), `href="/teach/"`) {
+		t.Error("no link to the courses or no menu item Teach")
 	}
 }

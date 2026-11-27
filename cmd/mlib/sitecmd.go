@@ -15,6 +15,7 @@ import (
 	"github.com/tamnd/mathlib-agent/blueprint"
 	"github.com/tamnd/mathlib-agent/drift"
 	"github.com/tamnd/mathlib-agent/site"
+	"github.com/tamnd/mathlib-agent/teach"
 )
 
 func runSite(args []string, stdout, stderr io.Writer) error {
@@ -41,6 +42,7 @@ func runSiteBuild(args []string, stdout, stderr io.Writer) error {
 	out := fs.String("out", "public", "the output directory")
 	base := fs.String("base", "/", "the path of the site root")
 	origin := fs.String("url", "https://mathlib.tamnd.com", "the canonical origin of the site")
+	book := fs.String("book", "", "a checkout of tamnd/mathlib-handbook, for the exercises of /teach/; empty for none")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -56,8 +58,16 @@ func runSiteBuild(args []string, stdout, stderr io.Writer) error {
 	if err != nil {
 		return err
 	}
+	paths, err := teach.LoadPaths(filepath.Join(*mapDir, "blueprint", "paths.yaml"))
+	if err != nil {
+		return err
+	}
+	text, err := teach.LoadBook(*book)
+	if err != nil {
+		return err
+	}
 	start := time.Now()
-	st, err := site.Build(site.Input{Index: ix, Map: vm, Depths: depths, Drift: records}, site.Config{
+	st, err := site.Build(site.Input{Index: ix, Map: vm, Depths: depths, Drift: records, Paths: paths, Book: text}, site.Config{
 		Out: *out, Base: *base, URL: *origin, Version: Version, Built: time.Now().UTC().Format("2006-01-02"),
 	})
 	if err != nil {
