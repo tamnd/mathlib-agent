@@ -1,0 +1,14 @@
+{{define "exercises"}}
+<header class="page-head">
+  <h1>The exercises by grade</h1>
+  <p class="lead">Each section of the handbook ends with four to twelve exercises (spec 07.2). The grade of an exercise is (A) routine, (B) needs an idea, (C) hard, or (L) in Lean. Each (L) exercise is a file of tamnd/mathlib-lean with a statement and a solution. The volumes with text have {{num .Data.Total}} exercises.</p>
+</header>
+<table class="list">
+  <thead><tr><th>Volume</th>{{range .Data.Counts}}<th class="n" title="{{.Name}}">{{.Grade}}</th>{{end}}<th class="n">All</th></tr></thead>
+  <tbody>
+    {{range .Data.Volumes}}<tr><td><a href="{{url (print "teach/exercises/" .ID "/")}}">{{.ID}}. {{.Title}}</a></td>{{range .Counts}}<td class="n">{{num .N}}</td>{{end}}<td class="n">{{num .Total}}</td></tr>
+    {{end}}
+  </tbody>
+  <tfoot><tr><td>All</td>{{range .Data.Counts}}<td class="n">{{num .N}}</td>{{end}}<td class="n">{{num .Data.Total}}</td></tr></tfoot>
+</table>
+{{end}}

@@ -1,0 +1,24 @@
+{{define "exvolume"}}
+{{$v := .Data}}
+<header class="page-head">
+  <h1>The exercises of {{$v.ID}}. {{$v.Title}}</h1>
+  <p class="lead">The volume has {{num $v.Total}} exercises. The first table counts them by chapter and grade. The lists below give each exercise with its section, by grade.</p>
+</header>
+<table class="list">
+  <thead><tr><th>Chapter</th>{{range $v.Counts}}<th class="n" title="{{.Name}}">{{.Grade}}</th>{{end}}<th class="n">All</th></tr></thead>
+  <tbody>
+    {{range $v.Chapters}}<tr><td>{{.N}}. {{.Title}}</td>{{range .Counts}}<td class="n">{{.N}}</td>{{end}}<td class="n">{{.Total}}</td></tr>
+    {{end}}
+  </tbody>
+</table>
+{{range $v.ByGrade}}
+<section>
+  <h2>Grade {{.Grade}}: {{.Name}}</h2>
+  <ol class="exercises">
+    {{range .Items}}<li><span class="ref">{{.Section}}, exercise {{.N}} ({{.Title}})</span> {{.Text}}</li>
+    {{end}}
+  </ol>
+</section>
+{{end}}
+<p><a href="{{url "teach/exercises/"}}">All the volumes</a></p>
+{{end}}

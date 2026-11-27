@@ -1,0 +1,17 @@
+{{define "teach"}}
+<header class="page-head">
+  <h1>Teach</h1>
+  <p class="lead">These pages are for a teacher who uses the handbook in a course. Each reading path of the handbook is a course: a list of volumes in order, with the chapters to take. The exercises of each section have a grade: (A) routine, (B) needs an idea, (C) hard, and (L) in Lean.</p>
+</header>
+<h2>The courses</h2>
+<table class="list">
+  <thead><tr><th>Path</th><th>For</th><th class="n">Volumes</th><th class="n">With text</th><th class="n">Sections</th><th class="n">Exercises</th></tr></thead>
+  <tbody>
+    {{range .Data.Courses}}<tr><td><a href="{{url (print "teach/" .ID "/")}}">{{.ID}}. {{.Title}}</a></td><td>{{.For}}</td><td class="n">{{len .Steps}}</td><td class="n">{{.Written}}</td><td class="n">{{num .Sections}}</td><td class="n">{{num .Total}}</td></tr>
+    {{end}}
+  </tbody>
+</table>
+<p>A volume with text can still be a draft. The status of each section is on the page of the course. A course that uses a draft volume is welcome (spec 16, Q-18), but the teacher must check the text first.</p>
+<h2>The exercises</h2>
+<p>The page <a href="{{url "teach/exercises/"}}">The exercises by grade</a> lists the exercises of each volume, by chapter and by grade.</p>
+{{end}}

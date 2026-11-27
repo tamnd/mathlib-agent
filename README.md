@@ -36,6 +36,10 @@ Run `mlib help` to see the commands. A usage error exits with code 2. A failed c
 
 `mlib catalogue -index index -map ../mathlib -volume V05,V13 -out catalogue` writes the rows of the Catalogue volumes of spec 06.4, one file `C05.jsonl.gz` for each main volume. The first line is a header with the counts. Each other line is one declaration whose home is in the volume, in module order, with the kind, the attributes, the depth, the home section and a sentence. The sentence is the E1 record when its type hash is current and no check failed. When there is no such record, the sentence is the text of the E0 family, then the first sentence of the docstring. The field `source` tells which. `mlhb catalogue` of tamnd/mathlib-handbook sets the files as books.
 
+### The site
+
+`mlib site build -index index -map ../mathlib -book ../mathlib-handbook -out public` builds the site. The pages `/teach/` give the reading paths of `blueprint/paths.yaml` as courses, with the volumes, the chapters and the count of exercises of each grade. They also list the exercises of each volume by grade: (A) routine, (B) needs an idea, (C) hard and (L) in Lean. Without `-book`, the courses have no chapters and no exercises. `mlib site check -out public` checks the internal links.
+
 ## Use as a library
 
 The packages are at the root of the module, so other Go programs can import them. The API can change before v1.0.0.
@@ -57,6 +61,7 @@ The packages are at the root of the module, so other Go programs can import them
 | `rename` | make the rename table from the drift records and rewrite the names in the book, the companion and the E1 records (spec 05.4) |
 | `report` | write the weekly report and the edition report (spec 05.6, 09.1) |
 | `site` | build and check the site mathlib.tamnd.com |
+| `teach` | read the reading paths of the map and the exercises of the handbook, for the pages `/teach/` (spec 06.6, 13.1) |
 | `stale` | find the sections that the drift makes stale and write the stale marks (spec 05.5) |
 
 ```go

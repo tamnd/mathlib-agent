@@ -26,6 +26,7 @@ import (
 	"github.com/tamnd/mathlib-agent/depth"
 	"github.com/tamnd/mathlib-agent/drift"
 	"github.com/tamnd/mathlib-agent/index"
+	"github.com/tamnd/mathlib-agent/teach"
 	"github.com/yuin/goldmark"
 )
 
@@ -50,6 +51,8 @@ type Input struct {
 	Map    *blueprint.VolumeMap
 	Depths map[string]depth.Result
 	Drift  []drift.Record
+	Paths  []teach.Path // the reading paths of blueprint/paths.yaml, for /teach/
+	Book   teach.Book   // the text of the handbook, for the exercises of /teach/; nil when the build has no checkout of the book
 }
 
 // Config is the place and the stamp of a build.
@@ -164,6 +167,9 @@ func Build(in Input, cfg Config) (Stats, error) {
 			{"coverage/", "coverage", "Coverage", "The coverage numbers of each volume"},
 			{"drift/", "drift", "Drift", "What changed in Mathlib at each sync"},
 		},
+	}
+	if len(in.Paths) > 0 {
+		b.site.Menu = append(b.site.Menu, menuItem{"teach/", "teach", "Teach", "The reading paths as courses, and the exercises by grade"})
 	}
 	if err := b.parse(); err != nil {
 		return Stats{}, err
@@ -318,6 +324,12 @@ func Build(in Input, cfg Config) (Stats, error) {
 		name string
 		p    page
 	}{"drift", page{Path: "drift/", Section: "drift", Title: "Drift", Description: "The drift records of the Mathlib Handbook: what changed in Mathlib at each sync.", Data: dv}})
+	for _, tp := range b.teachPages(byVol) {
+		pages = append(pages, struct {
+			name string
+			p    page
+		}{tp.name, tp.p})
+	}
 	for _, p := range pages {
 		if err := b.page(p.name, p.p); err != nil {
 			return Stats{}, err
@@ -395,6 +407,7 @@ func (b *builder) parse() error {
 		"canonical": func(p string) string { return b.cfg.URL + b.url(p) },
 		"short":     short,
 		"num":       num,
+		"inc":       func(i int) int { return i + 1 },
 		"pct":       func(f float64) string { return strconv.FormatFloat(100*f, 'f', 0, 64) + "%" },
 		"md":        b.markdown,
 		"docsURL": func(mod, name string) string {

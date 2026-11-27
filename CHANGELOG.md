@@ -4,6 +4,12 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+### Added
+
+- The pages `/teach/` of the site (spec 13.1). The page `/teach/` lists the reading paths of `blueprint/paths.yaml` of the map. Each path has a course page with its volumes, its chapters, the status of the sections and the count of exercises of each grade. The pages `/teach/exercises/` list the exercises of each volume by grade.
+- `mlib site build -book <dir>` reads the sections of a checkout of tamnd/mathlib-handbook, for the exercises of the pages `/teach/`.
+- The package `teach` reads the reading paths and the exercises.
+
 ## v0.3.0 - 2026-11-27
 
 ### Added

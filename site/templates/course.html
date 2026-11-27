@@ -1,0 +1,31 @@
+{{define "course"}}
+{{$c := .Data}}
+<header class="page-head">
+  <h1>Path {{$c.ID}}. {{$c.Title}}</h1>
+  <p class="lead">The course for {{$c.For}}.{{if $c.Before}} It starts after the path{{range $i, $p := $c.Before}}{{if $i}} and{{end}} <a href="{{url (print "teach/" $p.ID "/")}}">{{$p.ID}}</a>{{end}}.{{end}} It has {{len $c.Steps}} volumes. {{$c.Written}} of them have text now, with {{num $c.Sections}} sections and {{num $c.Total}} exercises.</p>
+</header>
+{{if $c.Steps}}
+<table class="list">
+  <thead><tr><th>Step</th><th>Volume</th><th>Chapters</th><th class="n">Sections</th>{{range $c.Counts}}<th class="n" title="{{.Name}}">{{.Grade}}</th>{{end}}</tr></thead>
+  <tbody>
+    {{range $i, $s := $c.Steps}}<tr><td class="n">{{inc $i}}</td><td>{{if $s.Known}}<a href="{{url (print "area/" $s.Volume "/")}}">{{$s.Volume}}. {{$s.Title}}</a>{{else}}{{$s.Volume}}{{end}}</td><td>{{if $s.Range}}{{$s.Range}}{{else}}all{{end}}</td><td class="n">{{if $s.Written}}{{$s.Sections}}{{else}}not written yet{{end}}</td>{{range $s.Counts}}<td class="n">{{.N}}</td>{{end}}</tr>
+    {{end}}
+  </tbody>
+  <tfoot><tr><td></td><td>All</td><td></td><td class="n">{{num $c.Sections}}</td>{{range $c.Counts}}<td class="n">{{num .N}}</td>{{end}}</tr></tfoot>
+</table>
+{{end}}
+{{with $c.Note}}<p>{{.}}</p>{{end}}
+{{range $c.Steps}}{{if .Written}}
+<section>
+  <h2>{{.Volume}}. {{.Title}}{{with .Range}} ({{.}}){{end}}</h2>
+  <table class="list">
+    <thead><tr><th>Chapter</th><th>Sections</th><th>Status</th>{{range .Counts}}<th class="n" title="{{.Name}}">{{.Grade}}</th>{{end}}</tr></thead>
+    <tbody>
+      {{range .Chapters}}<tr><td>{{.N}}. {{.Title}}</td><td>{{range $i, $s := .Sections}}{{if $i}}; {{end}}{{$s.Title}}{{end}}</td><td>{{.Statuses}}</td>{{range .Counts}}<td class="n">{{.N}}</td>{{end}}</tr>
+      {{end}}
+    </tbody>
+  </table>
+  <p><a href="{{url (print "teach/exercises/" .Volume "/")}}">The exercises of {{.Volume}} by grade</a></p>
+</section>
+{{end}}{{end}}
+{{end}}
