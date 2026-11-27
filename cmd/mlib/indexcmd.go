@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -98,8 +99,8 @@ type asset struct {
 	URL  string `json:"browser_download_url"`
 }
 
-// pickAssets returns the index and modules assets of the commit, or of the newest date when commit is "latest". The names are index-<date>-<commit>.jsonl.gz and modules-<date>-<commit>.jsonl.gz.
-func pickAssets(assets []asset, commit string) (idx, mods asset, err error) {
+// pickAssets returns the index and modules assets of the commit, or of the newest date when commit is "latest". The names are index-<date>-<commit>.jsonl.gz and modules-<date>-<commit>.jsonl.gz. The proofs asset proofs-<date>-<commit>.jsonl.gz is optional: an index from before 2026-11-27 has none, and then proofs has no name.
+func pickAssets(assets []asset, commit string) (idx, mods, proofs asset, err error) {
 	var names []string
 	byName := map[string]asset{}
 	for _, a := range assets {
@@ -116,16 +117,16 @@ func pickAssets(assets []asset, commit string) (idx, mods asset, err error) {
 		}
 	}
 	if len(names) == 0 {
-		return idx, mods, fmt.Errorf("the release %s of %s has no index for %s", indexTag, indexRepo, commit)
+		return idx, mods, proofs, fmt.Errorf("the release %s of %s has no index for %s", indexTag, indexRepo, commit)
 	}
 	sort.Strings(names)
 	key := names[len(names)-1]
 	idx = byName["index-"+key+".jsonl.gz"]
 	mods, ok := byName["modules-"+key+".jsonl.gz"]
 	if !ok {
-		return idx, mods, fmt.Errorf("the release has index-%s.jsonl.gz but no modules-%s.jsonl.gz", key, key)
+		return idx, mods, proofs, fmt.Errorf("the release has index-%s.jsonl.gz but no modules-%s.jsonl.gz", key, key)
 	}
-	return idx, mods, nil
+	return idx, mods, byName["proofs-"+key+".jsonl.gz"], nil
 }
 
 func runIndex(args []string, stdout, stderr io.Writer) error {
@@ -155,11 +156,19 @@ func runIndex(args []string, stdout, stderr io.Writer) error {
 		if err != nil {
 			return err
 		}
-		ia, ma, err := pickAssets(rel.Assets, *commit)
+		ia, ma, pa, err := pickAssets(rel.Assets, *commit)
 		if err != nil {
 			return err
 		}
-		for _, a := range []struct{ asset, file string }{{ia.URL, "index.jsonl.gz"}, {ma.URL, "modules.jsonl.gz"}} {
+		files := []struct{ asset, file string }{{ia.URL, "index.jsonl.gz"}, {ma.URL, "modules.jsonl.gz"}}
+		// Remove a proofs file of an earlier fetch, so that the index and the proofs are always of one commit.
+		if err := os.Remove(filepath.Join(*out, "proofs.jsonl.gz")); err != nil && !errors.Is(err, os.ErrNotExist) { //nolint:gosec // the path comes from the -out flag of the user
+			return err
+		}
+		if pa.Name != "" {
+			files = append(files, struct{ asset, file string }{pa.URL, "proofs.jsonl.gz"})
+		}
+		for _, a := range files {
 			if err := download(ctx, a.asset, filepath.Join(*out, a.file)); err != nil {
 				return err
 			}
@@ -176,6 +185,9 @@ func runIndex(args []string, stdout, stderr io.Writer) error {
 			}
 		}
 		fmt.Fprintf(stdout, "%s: %d declarations and %d modules of Mathlib %s, toolchain %s, from %s\n", *out, len(ix.Decls), len(ix.Modules), short(ix.Header.Mathlib), ix.Header.Toolchain, ia.Name)
+		if !ix.Proofs {
+			fmt.Fprintf(stdout, "%s has no proofs file, so the used-by counts of rule 2 of spec 04.4 have only the uses of the types\n", ia.Name)
+		}
 		return nil
 	case "show":
 		dir := fs.String("index", "index", "the directory of the index")
