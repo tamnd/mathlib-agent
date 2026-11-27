@@ -4,6 +4,8 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+## v0.3.0 - 2026-11-27
+
 ### Added
 
 - `mlib stale -book <dir>` marks the sections that the drift makes stale (spec 05.5). A section is stale when a drift record after its `mathlib` commit has a breaking or a minor item about a declaration of its `explains` list, a name in its text or a module of its `modules` list. A rename or a move item does not make a section stale. With `-apply`, the command sets `status: stale`, `stale_since` and `stale_from` in the front matter, sets the status of the section in the plan, and writes the refresher queue items to `records/stale.json`.
