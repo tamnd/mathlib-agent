@@ -32,6 +32,7 @@ func commands() []command {
 		{name: "version", summary: "print the version of mlib", run: runVersion},
 		{name: "index", summary: "download or read the index of Mathlib at a commit", run: runIndex},
 		{name: "sync", summary: "compare a new index with the last one and write the drift, the depths and the modules", run: runSync},
+		{name: "stale", summary: "mark the sections that the drift makes stale and write the refresher queue items", run: runStale},
 		{name: "coverage", summary: "compute the coverage numbers of spec 04.5", run: runCoverage},
 		{name: "depth", summary: "show the computed depth of a declaration and its reason", run: runDepth},
 		{name: "family", summary: "match, list or show the E0 families", run: runFamily},

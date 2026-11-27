@@ -354,6 +354,7 @@ func runSync(args []string, stdout, stderr io.Writer) error {
 	newDir := fs.String("new", "index", "the directory of the new index")
 	mapDir := fs.String("map", ".", "the checkout of tamnd/mathlib")
 	date := fs.String("date", time.Now().UTC().Format("2006-01-02"), "the date of the drift record")
+	book := fs.String("book", "", "a checkout of tamnd/mathlib-handbook; with it, the sync also writes the stale marks (spec 05.5)")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -396,6 +397,13 @@ func runSync(args []string, stdout, stderr io.Writer) error {
 	}
 	fmt.Fprintf(stdout, "sync to Mathlib %s, %s, %d drift items\n", short(rec.To), from, len(rec.Items))
 	writeCounts(stdout, rec.Counts)
+	if *book != "" && rec.From != "" {
+		res, err := staleMarks(*mapDir, *book, rec.To, *date, true)
+		if err != nil {
+			return err
+		}
+		writeStale(stdout, res)
+	}
 	if cov.Orphans > 0 {
 		return fmt.Errorf("%d declarations have no home volume: run mlib volumes orphans", cov.Orphans)
 	}

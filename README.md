@@ -22,7 +22,7 @@ Run `mlib help` to see the commands. A usage error exits with code 2. A failed c
 
 ### The roles
 
-`mlib queue -role <role>` prints the work queue of a role, with the rank and the reason of each item. The rank is the formula of spec 11.5: the weight of the volume in the current milestone, the planned sections that wait on the item, the level factor of a stale section, the failed runs and the age factor. The roles are planner, informalizer, family, writer, exampler, exerciser, checker, refresher and porter.
+`mlib queue -role <role>` prints the work queue of a role, with the rank and the reason of each item. The rank is the formula of spec 11.5: the weight of the volume in the current milestone, the planned sections that wait on the item, the level factor of a stale section, the failed runs and the age factor. `mlib stale -map <mathlib> -book <mathlib-handbook>` lists the sections that the drift makes stale. With `-apply`, it writes `status: stale`, `stale_since` and `stale_from` to the front matter, and the refresher queue items to `records/stale.json`. The refresher takes these items first when the volume is released. The roles are planner, informalizer, family, writer, exampler, exerciser, checker, refresher and porter.
 
 `mlib agent run <role>` takes the top of the queue, or the item of `-item`, and writes a run record to `records/runs/<id>/run.json` with the prompt in `prompt.md`. The prompts are in `prompts/<role>.md`. Text from Mathlib goes in marked data blocks. The budget comes from `agent.yaml` of the map and the spend of the day in `agent/ledger.jsonl`. With no `agent.yaml`, the budget is zero and no call goes out. The environment variable `MLIB_RUNNER` names the command that runs the prompt. It reads the prompt on stdin. Use `-dry-run` to see the record and the prompt and to write nothing. mlib sets the status `ran` or `failed`. It never sets `passed`, because Lean, the checks of spec 14 and people decide that.
 
@@ -57,6 +57,7 @@ The packages are at the root of the module, so other Go programs can import them
 | `rename` | make the rename table from the drift records and rewrite the names in the book, the companion and the E1 records (spec 05.4) |
 | `report` | write the weekly report and the edition report (spec 05.6, 09.1) |
 | `site` | build and check the site mathlib.tamnd.com |
+| `stale` | find the sections that the drift makes stale and write the stale marks (spec 05.5) |
 
 ```go
 import "github.com/tamnd/mathlib-agent/index"

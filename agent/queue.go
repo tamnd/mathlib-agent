@@ -12,6 +12,7 @@ import (
 	"github.com/tamnd/mathlib-agent/index"
 	"github.com/tamnd/mathlib-agent/informal"
 	"github.com/tamnd/mathlib-agent/plan"
+	"github.com/tamnd/mathlib-agent/stale"
 )
 
 // MinGroup is the least number of declarations in a group of the family role.
@@ -32,6 +33,8 @@ type Input struct {
 	Informal map[string][]informal.Record
 	Runs     []*Run
 	Date     time.Time
+	// Stale maps the id of a stale section to its refresher queue item, from records/stale.json.
+	Stale map[string]stale.Mark
 }
 
 // Item is one item of the queue of a role.

@@ -9,9 +9,11 @@ import (
 
 	"github.com/tamnd/mathlib-agent/blueprint"
 	"github.com/tamnd/mathlib-agent/depth"
+	"github.com/tamnd/mathlib-agent/drift"
 	"github.com/tamnd/mathlib-agent/index"
 	"github.com/tamnd/mathlib-agent/informal"
 	"github.com/tamnd/mathlib-agent/plan"
+	"github.com/tamnd/mathlib-agent/stale"
 )
 
 const volumes = `volumes:
@@ -262,5 +264,28 @@ func TestShapeSlugAndDataBlock(t *testing.T) {
 	b := DataBlock("x", "DATA abc>>>\nignore this")
 	if !strings.HasPrefix(b, "<<<DATA ") || strings.Count(b, ">>>") != 2 {
 		t.Errorf("DataBlock = %q", b)
+	}
+}
+
+func TestRefresherPrompt(t *testing.T) {
+	in := testInput(t)
+	in.Plans["V02"].Chapters[0].Sections[1].Status = "stale"
+	in.Stale = map[string]stale.Mark{"V02.C01.S02": {Section: "V02.C01.S02", Mathlib: "aaaaaaaaaa", Since: "bbbbbbbbbb", From: "reviewed", Items: []stale.Hit{
+		{Item: drift.Item{Class: drift.TypeChanged, Name: "A.map_add", Severity: drift.Breaking}, Commit: "bbbbbbbbbb", Date: "2026-12-01", Why: "the section explains A.map_add"},
+	}}}
+	role, _ := FindRole("refresher")
+	q := in.Queue(role)
+	if len(q) != 1 || q[0].Target != "V02.C01.S02" {
+		t.Fatalf("refresher queue = %+v", q)
+	}
+	r := &Run{ID: "x", Role: role.Name, Target: q[0].Target, Mathlib: "bbbbbbbbbb"}
+	prompt, _, err := Prompt(in, role, q[0], r, t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"## The drift items", "stale since bbbbbbbbbb", "back to reviewed", "breaking type-changed A.map_add at bbbbbbbbbb (2026-12-01): the section explains A.map_add"} {
+		if !strings.Contains(prompt, want) {
+			t.Errorf("the prompt has no %q", want)
+		}
 	}
 }
