@@ -90,7 +90,7 @@ func staleMarks(mapDir, book, to, date string, apply bool) (*staleResult, error)
 	if err != nil {
 		return nil, err
 	}
-	defer root.Close()
+	defer func() { _ = root.Close() }()
 	type write struct{ path, text string }
 	var writes []write
 	err = fs.WalkDir(root.FS(), "content", func(path string, d fs.DirEntry, err error) error {
