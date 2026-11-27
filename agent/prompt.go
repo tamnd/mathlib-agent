@@ -117,6 +117,14 @@ func sectionContext(b *strings.Builder, in *Input, role *Role, it Item) {
 	fmt.Fprintf(b, "\n## The section %s: %s\n\n- Volume: %s, %s\n- Chapter: %s, %s\n- Kind: %s\n- Status: %s\n- Pages: %.1f\n- Modules: %s\n- E3: %s\n- E2: %s\n- Families: %s\n- Requires: %s\n", s.ID, s.Title, it.Plan.Volume, it.Plan.Title, it.Chap.ID, it.Chap.Title, s.Kind, s.Status, s.Pages, strings.Join(s.Modules, ", "), orNone(s.E3), orNone(s.E2), orNone(s.Families), orNone(s.Requires))
 	b.WriteString("\n## The E3 and E2 declarations\n\n")
 	decls(b, in, append(append([]string{}, s.E3...), s.E2...))
+	if m, ok := in.Stale[s.ID]; ok && role.Name == "refresher" {
+		var lines []string
+		for _, h := range m.Items {
+			lines = append(lines, fmt.Sprintf("%s %s %s at %s (%s): %s. %s", h.Severity, h.Class, h.Name, short(h.Commit), h.Date, h.Why, h.Note))
+		}
+		fmt.Fprintf(b, "\n## The drift items\n\nThe section was read at %s. It is stale since %s, and its status before was %s. Set the status back to %s when the checks pass. If you change an E3 statement or proof of a reviewed section, set the status to checked, because a person must review it again.\n\n", short(m.Mathlib), short(m.Since), m.From, m.From)
+		b.WriteString(DataBlock("the drift items of "+s.ID, strings.Join(lines, "\n")))
+	}
 	if role.Name == "writer" || role.Name == "checker" {
 		mods := map[string]bool{}
 		for _, m := range s.Modules {
@@ -203,4 +211,12 @@ func tail(path string, n int) string {
 		lines = lines[len(lines)-n:]
 	}
 	return strings.Join(lines, "\n")
+}
+
+// short gives the first ten characters of a commit.
+func short(c string) string {
+	if len(c) > 10 {
+		return c[:10]
+	}
+	return c
 }

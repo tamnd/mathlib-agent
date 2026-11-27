@@ -4,6 +4,12 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+### Added
+
+- `mlib stale -book <dir>` marks the sections that the drift makes stale (spec 05.5). A section is stale when a drift record after its `mathlib` commit has a breaking or a minor item about a declaration of its `explains` list, a name in its text or a module of its `modules` list. A rename or a move item does not make a section stale. With `-apply`, the command sets `status: stale`, `stale_since` and `stale_from` in the front matter, sets the status of the section in the plan, and writes the refresher queue items to `records/stale.json`.
+- `mlib sync -book <dir>` writes the stale marks after the drift record.
+- The prompt of the refresher gives the drift items of the section, the commit and the date of each, and the status to set back. A change to an E3 statement or proof of a reviewed section sets the status to checked.
+
 ### Changed
 
 - The package `index` reads `proofs.jsonl` of scripts/Index.lean when the index directory has it, and `UsedBy` counts the theorems whose proof uses a declaration. Rule 2 of spec 04.4 now sees the uses in proofs. On the root `Mathlib.Order.Basic`, the E2 declarations go from 5 to 15.

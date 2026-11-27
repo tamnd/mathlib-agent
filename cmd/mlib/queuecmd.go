@@ -17,6 +17,7 @@ import (
 	"github.com/tamnd/mathlib-agent/family"
 	"github.com/tamnd/mathlib-agent/informal"
 	"github.com/tamnd/mathlib-agent/plan"
+	"github.com/tamnd/mathlib-agent/stale"
 )
 
 // queueFlags are the flags that mlib queue and mlib agent run share.
@@ -66,6 +67,14 @@ func loadInput(f queueFlags) (*agent.Input, error) {
 		return nil, err
 	}
 	in := &agent.Input{Index: ix, Volumes: vm, Milestones: ms, Current: cur, Depths: depths, Date: day, Plans: map[string]*plan.Plan{}, Informal: map[string][]informal.Record{}}
+	sr, err := stale.Load(stale.Path(*f.mapDir))
+	if err != nil {
+		return nil, err
+	}
+	in.Stale = map[string]stale.Mark{}
+	for _, m := range sr.Marks {
+		in.Stale[m.Section] = m
+	}
 	if _, err := os.Stat(familiesPath(*f.mapDir)); err == nil {
 		fams, err := family.Load(familiesPath(*f.mapDir))
 		if err != nil {
