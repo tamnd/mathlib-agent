@@ -6,6 +6,7 @@ import (
 	"github.com/tamnd/mathlib-agent/blueprint"
 	"github.com/tamnd/mathlib-agent/depth"
 	"github.com/tamnd/mathlib-agent/index"
+	"github.com/tamnd/mathlib-agent/stale"
 )
 
 func TestCompute(t *testing.T) {
@@ -33,6 +34,34 @@ func TestCompute(t *testing.T) {
 		t.Errorf("V13 = %+v", v)
 	}
 	if len(rows) != 2 || rows[1].Volume != "V13" || rows[0].Volume != "" {
+		t.Errorf("rows = %+v", rows)
+	}
+}
+
+func TestComputeBook(t *testing.T) {
+	vm, err := blueprint.ParseVolumes([]byte("volumes:\n  - id: V13\n    title: Topology\n    prefixes: [Mathlib/Topology]\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ix := &index.Index{
+		Decls: []index.Decl{
+			{Name: "a", Kind: "theorem", Module: "Mathlib.Topology.Basic"},
+			{Name: "b", Kind: "theorem", Module: "Mathlib.Topology.Basic"},
+			{Name: "c", Kind: "def", Module: "Mathlib.Topology.Basic"},
+			{Name: "e", Kind: "def", Module: "Mathlib.Topology.Other"},
+		},
+		Modules: []index.Module{{Module: "Mathlib.Topology.Basic"}, {Module: "Mathlib.Topology.Other"}},
+	}
+	depths := map[string]depth.Result{"a": {Depth: depth.E3}, "b": {Depth: depth.E3}, "c": {Depth: depth.E1}, "e": {Depth: depth.E1}}
+	b := &Book{Homes: map[string][]string{}, Auto: map[string]bool{}, Treated: map[string]string{}}
+	b.add(stale.Section{ID: "V13.C01.S01", Modules: []string{"Mathlib.Topology.Basic"}, ByDepth: map[string][]string{"E3": {"a"}, "E2": {"b"}}, Auto: true})
+	rec, rows := ComputeBook(ix, vm, depths, b, "2026-11-27")
+	v := rec.Volumes[0]
+	// a, b and c have a home; a is at E3 and c at E1 (auto), but b is only at E2
+	if v.CHome != 0.75 || v.CDepth != 0.5 || v.CE3 == nil || *v.CE3 != 0.5 {
+		t.Errorf("V13 = home %v, depth %v, e3 %v", v.CHome, v.CDepth, v.CE3)
+	}
+	if len(rows[0].Sections) != 1 || len(rows[1].Sections) != 0 {
 		t.Errorf("rows = %+v", rows)
 	}
 }

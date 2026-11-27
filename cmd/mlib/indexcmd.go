@@ -312,7 +312,12 @@ func runCoverage(args []string, stdout, stderr io.Writer) error {
 	mapDir := fs.String("map", ".", "the checkout of tamnd/mathlib")
 	write := fs.Bool("write", false, "write records/coverage.json and records/modules.json to the map")
 	date := fs.String("date", time.Now().UTC().Format("2006-01-02"), "the date of the record")
+	bookDir := fs.String("book", "", "a checkout of tamnd/mathlib-handbook; with it, C-home, C-depth and C-E3 come from the front matter of its sections")
 	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	book, err := loadBook(*bookDir)
+	if err != nil {
 		return err
 	}
 	vm, err := blueprint.LoadVolumes(filepath.Join(*mapDir, "blueprint", "volumes.yaml"))
@@ -323,7 +328,7 @@ func runCoverage(args []string, stdout, stderr io.Writer) error {
 	if err != nil {
 		return err
 	}
-	rec, rows := coverage.Compute(ix, vm, depths, *date)
+	rec, rows := coverage.ComputeBook(ix, vm, depths, book, *date)
 	writeCoverage(stdout, rec)
 	if *write {
 		if err := writeJSON(filepath.Join(*mapDir, "records", "coverage.json"), rec); err != nil {
@@ -339,11 +344,23 @@ func runCoverage(args []string, stdout, stderr io.Writer) error {
 	return nil
 }
 
+// loadBook reads the book for the coverage numbers. An empty dir gives no book.
+func loadBook(dir string) (*coverage.Book, error) {
+	if dir == "" {
+		return nil, nil
+	}
+	return coverage.LoadBook(dir)
+}
+
 func writeCoverage(w io.Writer, rec coverage.Record) {
 	fmt.Fprintf(w, "Mathlib %s: %d declarations, %d deprecated aliases, %d with no home volume\n", short(rec.Mathlib), rec.Total.Decls, rec.Aliases, rec.Orphans)
-	fmt.Fprintf(w, "%-4s %6s %7s %6s %6s %7s %7s %6s %7s\n", "vol", "mods", "decls", "E3", "E2", "E1", "E0", "C-home", "C-depth")
+	fmt.Fprintf(w, "%-4s %6s %7s %6s %6s %7s %7s %6s %7s %5s\n", "vol", "mods", "decls", "E3", "E2", "E1", "E0", "C-home", "C-depth", "C-E3")
 	for _, v := range append(rec.Volumes, rec.Total) {
-		fmt.Fprintf(w, "%-4s %6d %7d %6d %6d %7d %7d %5.0f%% %6.0f%%\n", v.Volume, v.Modules, v.Decls, v.Depth[depth.E3], v.Depth[depth.E2], v.Depth[depth.E1], v.Depth[depth.E0], 100*v.CHome, 100*v.CDepth)
+		e3 := "-"
+		if v.CE3 != nil {
+			e3 = fmt.Sprintf("%.0f%%", 100**v.CE3)
+		}
+		fmt.Fprintf(w, "%-4s %6d %7d %6d %6d %7d %7d %5.0f%% %6.0f%% %5s\n", v.Volume, v.Modules, v.Decls, v.Depth[depth.E3], v.Depth[depth.E2], v.Depth[depth.E1], v.Depth[depth.E0], 100*v.CHome, 100*v.CDepth, e3)
 	}
 }
 
@@ -384,7 +401,11 @@ func runSync(args []string, stdout, stderr io.Writer) error {
 	if err := writeJSON(filepath.Join(*mapDir, "records", "drift", *date+".json"), rec); err != nil {
 		return err
 	}
-	cov, rows := coverage.Compute(nix, vm, depths, *date)
+	cb, err := loadBook(*book)
+	if err != nil {
+		return err
+	}
+	cov, rows := coverage.ComputeBook(nix, vm, depths, cb, *date)
 	if err := writeJSON(filepath.Join(*mapDir, "records", "coverage.json"), cov); err != nil {
 		return err
 	}
