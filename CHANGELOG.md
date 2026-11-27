@@ -4,6 +4,11 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+### Changed
+
+- The package `index` reads `proofs.jsonl` of scripts/Index.lean when the index directory has it, and `UsedBy` counts the theorems whose proof uses a declaration. Rule 2 of spec 04.4 now sees the uses in proofs. On the root `Mathlib.Order.Basic`, the E2 declarations go from 5 to 15.
+- `mlib index fetch` downloads the asset `proofs-<date>-<commit>.jsonl.gz` when the release has it. It says so when the index has no proofs file.
+
 ## v0.2.0 - 2026-11-27
 
 ### Added

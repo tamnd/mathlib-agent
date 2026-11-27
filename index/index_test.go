@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -61,6 +62,39 @@ func TestLoad(t *testing.T) {
 	var back Decl
 	if err := json.Unmarshal(b, &back); err != nil || back.Deprecated == nil || back.Deprecated.Since != "2026-06-10" {
 		t.Errorf("round trip: %s, %v", b, err)
+	}
+}
+
+const proofs = `{"index":"proofs","format":1,"mathlib":"abc","count":2}
+{"name":"le_refl","proofUses":["Symmetric","lt_irrefl"]}
+{"name":"lt_irrefl","proofUses":["le_refl"]}
+`
+
+func TestLoadProofs(t *testing.T) {
+	dir := t.TempDir()
+	three := decls[:len(decls)-1] + "\n" + `{"name":"lt_irrefl","kind":"theorem","module":"Mathlib.Order.Defs","line":9,"typeHash":"0000cccc"}` + "\n"
+	for name, body := range map[string]string{"index.jsonl": three, "modules.jsonl": mods, "proofs.jsonl": proofs} {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	ix, err := Load(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ix.Proofs {
+		t.Fatal("Proofs is false")
+	}
+	ub := ix.UsedBy()
+	// le_refl uses Symmetric in its type and in its proof: one use. lt_irrefl is in another module than le_refl.
+	if ub["Symmetric"] != 1 || ub["lt_irrefl"] != 1 || ub["le_refl"] != 1 {
+		t.Errorf("used by = %v", ub)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "proofs.jsonl"), []byte(strings.Replace(proofs, `"abc"`, `"xyz"`, 1)), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(dir); err == nil {
+		t.Error("no error for a proofs.jsonl of another commit")
 	}
 }
 

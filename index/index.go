@@ -43,6 +43,7 @@ type Decl struct {
 	Attrs      []string     `json:"-"`
 	Deprecated *Deprecation `json:"-"`
 	Uses       []string     `json:"uses,omitempty"`
+	ProofUses  []string     `json:"proofUses,omitempty"` // from proofs.jsonl: the theorems of Mathlib that the proof uses
 	Error      string       `json:"error,omitempty"`
 }
 
@@ -121,6 +122,9 @@ type Index struct {
 	Header  Header
 	Decls   []Decl
 	Modules []Module
+	// Proofs is true when the directory has proofs.jsonl. An older index has no such file, and then UsedBy counts
+	// only the uses of the types and of the values of definitions.
+	Proofs bool
 
 	byName map[string]int
 }
@@ -204,7 +208,8 @@ func find(dir string, names ...string) (string, error) {
 	return "", fmt.Errorf("%s has none of %s", dir, strings.Join(names, ", "))
 }
 
-// Load reads index.jsonl and modules.jsonl, or their .gz forms, from a directory.
+// Load reads index.jsonl and modules.jsonl, or their .gz forms, from a directory. It also reads proofs.jsonl when
+// the directory has it.
 func Load(dir string) (*Index, error) {
 	ix := &Index{byName: map[string]int{}}
 	p, err := find(dir, "index.jsonl", "index.jsonl.gz")
@@ -244,7 +249,41 @@ func Load(dir string) (*Index, error) {
 	if mh.Mathlib != ix.Header.Mathlib {
 		return nil, fmt.Errorf("modules.jsonl is at %s and index.jsonl at %s", mh.Mathlib, ix.Header.Mathlib)
 	}
+	if p, err = find(dir, "proofs.jsonl", "proofs.jsonl.gz"); err == nil {
+		if err := ix.loadProofs(p); err != nil {
+			return nil, err
+		}
+	}
 	return ix, nil
+}
+
+// loadProofs reads the field proofUses of each theorem from proofs.jsonl (spec 09.3).
+func (ix *Index) loadProofs(p string) error {
+	var ph Header
+	err := readLines(p, &ph, func(line []byte) error {
+		var r struct {
+			Name      string   `json:"name"`
+			ProofUses []string `json:"proofUses"`
+		}
+		if err := json.Unmarshal(line, &r); err != nil {
+			return err
+		}
+		if d, ok := ix.Lookup(r.Name); ok {
+			d.ProofUses = r.ProofUses
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	if ph.Index != "proofs" {
+		return fmt.Errorf("%s: the header says %q; want proofs", p, ph.Index)
+	}
+	if ph.Mathlib != ix.Header.Mathlib {
+		return fmt.Errorf("proofs.jsonl is at %s and index.jsonl at %s", ph.Mathlib, ix.Header.Mathlib)
+	}
+	ix.Proofs = true
+	return nil
 }
 
 // Lookup returns the declaration with the name n.
@@ -262,14 +301,23 @@ func (ix *Index) Lookup(n string) (*Decl, bool) {
 	return &ix.Decls[i], true
 }
 
-// UsedBy counts, for each declaration, the declarations of other modules whose type or value use it.
+// UsedBy counts, for each declaration, the declarations of other modules whose type, value or proof use it. A
+// declaration that uses a name in its type and in its proof counts once.
 func (ix *Index) UsedBy() map[string]int {
 	out := map[string]int{}
+	seen := map[string]bool{}
 	for i := range ix.Decls {
 		d := &ix.Decls[i]
-		for _, u := range d.Uses {
-			if t, ok := ix.Lookup(u); ok && t.Module != d.Module {
-				out[u]++
+		clear(seen)
+		for _, list := range [][]string{d.Uses, d.ProofUses} {
+			for _, u := range list {
+				if seen[u] {
+					continue
+				}
+				seen[u] = true
+				if t, ok := ix.Lookup(u); ok && t.Module != d.Module {
+					out[u]++
+				}
 			}
 		}
 	}
