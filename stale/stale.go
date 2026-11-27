@@ -25,11 +25,14 @@ type Section struct {
 	Path     string
 	Modules  []string
 	Explains []string
-	Names    []string // the names of the text: the decl directives and the code spans that look like a name
-	Mathlib  string
-	Status   string
-	From     string // stale_from, when the section is already stale
-	Since    string // stale_since, when the section is already stale
+	// ByDepth gives the names of the explains list at each depth E3, E2 and E1. Auto is true for "E1: auto", which explains at E1 every declaration of the modules list.
+	ByDepth map[string][]string
+	Auto    bool
+	Names   []string // the names of the text: the decl directives and the code spans that look like a name
+	Mathlib string
+	Status  string
+	From    string // stale_from, when the section is already stale
+	Since   string // stale_since, when the section is already stale
 }
 
 // Hit is one drift item of a stale section, with the commit at which it happened.
@@ -151,11 +154,15 @@ func Parse(path, src string) (Section, bool, error) {
 		return Section{}, false, nil
 	}
 	s := Section{ID: ID(path), Path: path, Modules: f.Modules, Mathlib: f.Mathlib, Status: f.Status, From: f.From, Since: f.Since}
-	for _, v := range f.Explains {
+	s.ByDepth = map[string][]string{}
+	for k, v := range f.Explains {
 		if l, ok := v.([]any); ok { // E1: auto is not a list
 			for _, n := range l {
 				s.Explains = append(s.Explains, fmt.Sprint(n))
+				s.ByDepth[k] = append(s.ByDepth[k], fmt.Sprint(n))
 			}
+		} else if k == "E1" && v == "auto" {
+			s.Auto = true
 		}
 	}
 	sort.Strings(s.Explains)

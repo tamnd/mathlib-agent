@@ -51,8 +51,9 @@ type Input struct {
 	Map    *blueprint.VolumeMap
 	Depths map[string]depth.Result
 	Drift  []drift.Record
-	Paths  []teach.Path // the reading paths of blueprint/paths.yaml, for /teach/
-	Book   teach.Book   // the text of the handbook, for the exercises of /teach/; nil when the build has no checkout of the book
+	Paths  []teach.Path   // the reading paths of blueprint/paths.yaml, for /teach/
+	Book   teach.Book     // the text of the handbook, for the exercises of /teach/; nil when the build has no checkout of the book
+	Cover  *coverage.Book // the front matter of the handbook, for C-home, C-depth and C-E3; nil gives zero
 }
 
 // Config is the place and the stamp of a build.
@@ -187,7 +188,7 @@ func Build(in Input, cfg Config) (Stats, error) {
 	for _, m := range in.Index.Modules {
 		mods[m.Module] = &moduleView{Module: m.Module, Docs: m.Docs}
 	}
-	rec, _ := coverage.Compute(in.Index, in.Map, in.Depths, h.Date)
+	rec, _ := coverage.ComputeBook(in.Index, in.Map, in.Depths, in.Cover, h.Date)
 	decls := 0
 	for i := range in.Index.Decls {
 		d := &in.Index.Decls[i]

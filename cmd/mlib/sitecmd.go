@@ -42,7 +42,7 @@ func runSiteBuild(args []string, stdout, stderr io.Writer) error {
 	out := fs.String("out", "public", "the output directory")
 	base := fs.String("base", "/", "the path of the site root")
 	origin := fs.String("url", "https://mathlib.tamnd.com", "the canonical origin of the site")
-	book := fs.String("book", "", "a checkout of tamnd/mathlib-handbook, for the exercises of /teach/; empty for none")
+	book := fs.String("book", "", "a checkout of tamnd/mathlib-handbook, for the exercises of /teach/ and the coverage numbers; empty for none")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -66,8 +66,12 @@ func runSiteBuild(args []string, stdout, stderr io.Writer) error {
 	if err != nil {
 		return err
 	}
+	cover, err := loadBook(*book)
+	if err != nil {
+		return err
+	}
 	start := time.Now()
-	st, err := site.Build(site.Input{Index: ix, Map: vm, Depths: depths, Drift: records, Paths: paths, Book: text}, site.Config{
+	st, err := site.Build(site.Input{Index: ix, Map: vm, Depths: depths, Drift: records, Paths: paths, Book: text, Cover: cover}, site.Config{
 		Out: *out, Base: *base, URL: *origin, Version: Version, Built: time.Now().UTC().Format("2006-01-02"),
 	})
 	if err != nil {
