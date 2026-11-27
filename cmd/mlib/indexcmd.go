@@ -162,7 +162,7 @@ func runIndex(args []string, stdout, stderr io.Writer) error {
 		}
 		files := []struct{ asset, file string }{{ia.URL, "index.jsonl.gz"}, {ma.URL, "modules.jsonl.gz"}}
 		// Remove a proofs file of an earlier fetch, so that the index and the proofs are always of one commit.
-		if err := os.Remove(filepath.Join(*out, "proofs.jsonl.gz")); err != nil && !errors.Is(err, os.ErrNotExist) {
+		if err := os.Remove(filepath.Join(*out, "proofs.jsonl.gz")); err != nil && !errors.Is(err, os.ErrNotExist) { //nolint:gosec // the path comes from the -out flag of the user
 			return err
 		}
 		if pa.Name != "" {
