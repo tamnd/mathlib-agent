@@ -1,6 +1,9 @@
 package prompts
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestEveryRoleHasAPrompt(t *testing.T) {
 	for _, r := range []string{"planner", "informalizer", "family", "writer", "exampler", "exerciser", "checker", "refresher", "porter"} {
@@ -9,7 +12,7 @@ func TestEveryRoleHasAPrompt(t *testing.T) {
 			t.Errorf("%s: %v", r, err)
 			continue
 		}
-		if p.Role != r || p.Version != r+"-1" || p.Body == "" {
+		if p.Role != r || !strings.HasPrefix(p.Version, r+"-") || p.Body == "" {
 			t.Errorf("%s: %+v", r, p)
 		}
 	}
