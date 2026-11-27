@@ -4,6 +4,8 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+## v0.5.1 - 2026-11-27
+
 ### Added
 
 - `mlib coverage -book <dir>` reads the front matter of the sections of the handbook and computes C-home, C-depth and C-E3 (spec 04.5). A module has a home when a section lists it in `modules`. A name in an `explains` list has the depth of the list. A section with `E1: auto` explains every declaration of its modules at E1. `mlib sync -book` and `mlib site -book` use the same numbers.
