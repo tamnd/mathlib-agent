@@ -28,6 +28,8 @@ var Depths = []string{E3, E2, E1, E0}
 type Result struct {
 	Depth  string `json:"depth"`
 	Reason string `json:"reason"`
+	// Curated is true for an E3 candidate from a curated list or from the top of the used-by ranking. The release rule of spec 12.6 uses this part of C-E3.
+	Curated bool `json:"curated,omitempty"`
 }
 
 // Lists are the curated lists of Mathlib (spec 04.4, rule 1): the names in docs/overview.yaml, docs/undergrad.yaml, docs/100.yaml and docs/1000.yaml.
@@ -172,7 +174,7 @@ func Compute(ix *index.Index, lists Lists, topShare float64, minUses int) map[st
 		}
 		for n := range s {
 			if strings.HasSuffix(d.Name, "."+n) {
-				out[d.Name] = Result{E3, "named under a Main heading of its module"}
+				out[d.Name] = Result{Depth: E3, Reason: "named under a Main heading of its module"}
 				break
 			}
 		}
@@ -182,38 +184,38 @@ func Compute(ix *index.Index, lists Lists, topShare float64, minUses int) map[st
 
 func rule(d *index.Decl, lists Lists, main map[string]string, top map[string]bool, usedBy map[string]int, minUses int) Result {
 	if d.Deprecated != nil {
-		return Result{E0, "a deprecated alias, listed under its target"}
+		return Result{Depth: E0, Reason: "a deprecated alias, listed under its target"}
 	}
 	// Rule 1.
 	if l, ok := lists[d.Name]; ok {
-		return Result{E3, "in the curated list " + strings.Join(l, ", ")}
+		return Result{Depth: E3, Reason: "in the curated list " + strings.Join(l, ", "), Curated: true}
 	}
 	if _, ok := main[d.Name]; ok {
-		return Result{E3, "named under a Main heading of its module"}
+		return Result{Depth: E3, Reason: "named under a Main heading of its module"}
 	}
 	if top[d.Name] {
-		return Result{E3, "a class or structure in the top of the used-by ranking"}
+		return Result{Depth: E3, Reason: "a class or structure in the top of the used-by ranking", Curated: true}
 	}
 	// Rule 3 comes before rule 2 for the mechanical forms: a simp lemma used five times is still a simp lemma.
 	last := lastComponent(d.Name)
 	switch {
 	case d.Kind == "instance":
-		return Result{E0, "an instance"}
+		return Result{Depth: E0, Reason: "an instance"}
 	case d.Kind == "ctor":
-		return Result{E0, "a constructor, explained with its type"}
+		return Result{Depth: E0, Reason: "a constructor, explained with its type"}
 	case e0Suffix.MatchString(last) || e0Prefix.MatchString(last):
-		return Result{E0, "a name of a family pattern"}
+		return Result{Depth: E0, Reason: "a name of a family pattern"}
 	case d.Has("simp") && d.Kind == "theorem":
-		return Result{E0, "a simp lemma"}
+		return Result{Depth: E0, Reason: "a simp lemma"}
 	}
 	// Rule 2.
 	if d.Kind == "theorem" {
 		if usedBy[d.Name] >= minUses {
-			return Result{E2, "used by other modules"}
+			return Result{Depth: E2, Reason: "used by other modules"}
 		}
 		if namedResult.MatchString(d.Doc) {
-			return Result{E2, "its docstring names a result"}
+			return Result{Depth: E2, Reason: "its docstring names a result"}
 		}
 	}
-	return Result{E1, "no rule above"}
+	return Result{Depth: E1, Reason: "no rule above"}
 }

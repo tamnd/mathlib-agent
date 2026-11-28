@@ -354,13 +354,17 @@ func loadBook(dir string) (*coverage.Book, error) {
 
 func writeCoverage(w io.Writer, rec coverage.Record) {
 	fmt.Fprintf(w, "Mathlib %s: %d declarations, %d deprecated aliases, %d with no home volume\n", short(rec.Mathlib), rec.Total.Decls, rec.Aliases, rec.Orphans)
-	fmt.Fprintf(w, "%-4s %6s %7s %6s %6s %7s %7s %6s %7s %5s\n", "vol", "mods", "decls", "E3", "E2", "E1", "E0", "C-home", "C-depth", "C-E3")
+	fmt.Fprintf(w, "%-4s %6s %7s %6s %6s %7s %7s %6s %7s %5s %5s\n", "vol", "mods", "decls", "E3", "E2", "E1", "E0", "C-home", "C-depth", "C-E3", "cur")
 	for _, v := range append(rec.Volumes, rec.Total) {
 		e3 := "-"
 		if v.CE3 != nil {
 			e3 = fmt.Sprintf("%.0f%%", 100**v.CE3)
 		}
-		fmt.Fprintf(w, "%-4s %6d %7d %6d %6d %7d %7d %5.0f%% %6.0f%% %5s\n", v.Volume, v.Modules, v.Decls, v.Depth[depth.E3], v.Depth[depth.E2], v.Depth[depth.E1], v.Depth[depth.E0], 100*v.CHome, 100*v.CDepth, e3)
+		cur := "-"
+		if v.CE3Curated != nil {
+			cur = fmt.Sprintf("%.0f%%", 100**v.CE3Curated)
+		}
+		fmt.Fprintf(w, "%-4s %6d %7d %6d %6d %7d %7d %5.0f%% %6.0f%% %5s %5s\n", v.Volume, v.Modules, v.Decls, v.Depth[depth.E3], v.Depth[depth.E2], v.Depth[depth.E1], v.Depth[depth.E0], 100*v.CHome, 100*v.CDepth, e3, cur)
 	}
 }
 
