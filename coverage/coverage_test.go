@@ -52,7 +52,7 @@ func TestComputeBook(t *testing.T) {
 		},
 		Modules: []index.Module{{Module: "Mathlib.Topology.Basic"}, {Module: "Mathlib.Topology.Other"}},
 	}
-	depths := map[string]depth.Result{"a": {Depth: depth.E3}, "b": {Depth: depth.E3}, "c": {Depth: depth.E1}, "e": {Depth: depth.E1}}
+	depths := map[string]depth.Result{"a": {Depth: depth.E3}, "b": {Depth: depth.E3, Curated: true}, "c": {Depth: depth.E1}, "e": {Depth: depth.E1}}
 	b := &Book{Homes: map[string][]string{}, Auto: map[string]bool{}, Treated: map[string]string{}}
 	b.add(stale.Section{ID: "V13.C01.S01", Modules: []string{"Mathlib.Topology.Basic"}, ByDepth: map[string][]string{"E3": {"a"}, "E2": {"b"}}, Auto: true})
 	rec, rows := ComputeBook(ix, vm, depths, b, "2026-11-27")
@@ -60,6 +60,10 @@ func TestComputeBook(t *testing.T) {
 	// a, b and c have a home; a is at E3 and c at E1 (auto), but b is only at E2
 	if v.CHome != 0.75 || v.CDepth != 0.5 || v.CE3 == nil || *v.CE3 != 0.5 {
 		t.Errorf("V13 = home %v, depth %v, e3 %v", v.CHome, v.CDepth, v.CE3)
+	}
+	// b is the only curated candidate, and it has no E3 text
+	if v.CE3Curated == nil || *v.CE3Curated != 0 {
+		t.Errorf("V13 curated e3 = %v", v.CE3Curated)
 	}
 	if len(rows[0].Sections) != 1 || len(rows[1].Sections) != 0 {
 		t.Errorf("rows = %+v", rows)

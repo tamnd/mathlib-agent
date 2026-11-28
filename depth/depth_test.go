@@ -65,4 +65,8 @@ func TestCompute(t *testing.T) {
 			t.Errorf("%s: %s (%s); want %s", n, got[n].Depth, got[n].Reason, w)
 		}
 	}
+	// A name of a curated list is in the curated part of C-E3, and a name under a Main heading is not.
+	if !got["Group"].Curated || got["Foo.bar"].Curated {
+		t.Errorf("curated: Group %v, Foo.bar %v", got["Group"].Curated, got["Foo.bar"].Curated)
+	}
 }

@@ -4,6 +4,8 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+- `mlib coverage` gives the curated part of C-E3 in a new column and in the field `cE3Curated` of `records/coverage.json`. The curated part counts only the E3 candidates from a curated list or from the top of the used-by ranking. The depth record marks these names with `curated: true`.
+
 ## v0.8.0 - 2026-11-28
 
 ## v0.7.1 - 2026-11-28

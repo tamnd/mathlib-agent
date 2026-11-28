@@ -19,7 +19,7 @@ type Counts struct {
 func newCounts() Counts { return Counts{Depth: map[string]int{}, Kind: map[string]int{}} }
 
 // tally counts the declarations that the book gives a home, that it explains at the required depth, and the E3 candidates that it explains at E3.
-type tally struct{ home, deep, e3, e3done int }
+type tally struct{ home, deep, e3, e3done, cur, curdone int }
 
 func (t *tally) add(b *Book, d *index.Decl, r depth.Result) {
 	if b == nil {
@@ -28,6 +28,9 @@ func (t *tally) add(b *Book, d *index.Decl, r depth.Result) {
 	dp, ok := b.treatment(d.Name, d.Module)
 	if r.Depth == depth.E3 {
 		t.e3++
+		if r.Curated {
+			t.cur++
+		}
 	}
 	if !ok {
 		return
@@ -39,6 +42,9 @@ func (t *tally) add(b *Book, d *index.Decl, r depth.Result) {
 		t.deep++
 		if r.Depth == depth.E3 {
 			t.e3done++
+			if r.Curated {
+				t.curdone++
+			}
 		}
 	}
 }
@@ -51,6 +57,10 @@ func (t tally) set(v *VolumeRow) {
 	if t.e3 > 0 {
 		c := float64(t.e3done) / float64(t.e3)
 		v.CE3 = &c
+	}
+	if t.cur > 0 {
+		c := float64(t.curdone) / float64(t.cur)
+		v.CE3Curated = &c
 	}
 }
 
@@ -76,6 +86,8 @@ type VolumeRow struct {
 	CHome   float64  `json:"cHome"`  // the share of declarations with a home section
 	CDepth  float64  `json:"cDepth"` // the share explained at the required depth or higher
 	CE3     *float64 `json:"cE3"`    // the E3 candidates with an E3 treatment; null when there are none
+	// CE3Curated is C-E3 for the curated E3 candidates only (depth.Result.Curated); null when there are none.
+	CE3Curated *float64 `json:"cE3Curated"`
 	Counts
 }
 
