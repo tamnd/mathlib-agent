@@ -4,6 +4,8 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+## v0.8.2 - 2026-11-28
+
 ## v0.8.1 - 2026-11-28
 
 - `mlib coverage` reads the `lower` field of the front matter (spec 04.4). An E3 candidate that a section lowers with a reason needs only E2 text. A name from a curated list cannot be lowered, so its `lower` entry has no effect.
