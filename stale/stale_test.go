@@ -16,6 +16,7 @@ explains:
   E3: [Equiv]
   E2: [Function.Bijective]
   E1: auto
+lower: {Function.Bijective: "a step of the proof of Equiv"}
 mathlib: aaaaaaaaaa
 status: reviewed
 reviewed_by: [a person]
@@ -48,6 +49,9 @@ func TestParse(t *testing.T) {
 	}
 	if strings.Join(s.Explains, " ") != "Equiv Function.Bijective" {
 		t.Errorf("explains = %v", s.Explains)
+	}
+	if s.Lower["Function.Bijective"] != "a step of the proof of Equiv" {
+		t.Errorf("lower = %v", s.Lower)
 	}
 	if strings.Join(s.Names, " ") != "Equiv.symm Function.Injective.comp" {
 		t.Errorf("names = %v", s.Names)

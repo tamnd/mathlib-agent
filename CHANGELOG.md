@@ -4,6 +4,8 @@ Each release has a section. The newest release is first.
 
 ## Unreleased
 
+- `mlib coverage` reads the `lower` field of the front matter (spec 04.4). An E3 candidate that a section lowers with a reason needs only E2 text. A name from a curated list cannot be lowered, so its `lower` entry has no effect.
+
 - `mlib coverage` gives the curated part of C-E3 in a new column and in the field `cE3Curated` of `records/coverage.json`. The curated part counts only the E3 candidates from a curated list or from the top of the used-by ranking. The depth record marks these names with `curated: true`.
 
 ## v0.8.0 - 2026-11-28

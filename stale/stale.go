@@ -28,6 +28,8 @@ type Section struct {
 	// ByDepth gives the names of the explains list at each depth E3, E2 and E1. Auto is true for "E1: auto", which explains at E1 every declaration of the modules list.
 	ByDepth map[string][]string
 	Auto    bool
+	// Lower gives the names that the section lowers from E3, with the reason (spec 04.4).
+	Lower   map[string]string
 	Names   []string // the names of the text: the decl directives and the code spans that look like a name
 	Mathlib string
 	Status  string
@@ -140,12 +142,13 @@ func Parse(path, src string) (Section, bool, error) {
 		return Section{}, false, nil
 	}
 	var f struct {
-		Modules  []string       `yaml:"modules"`
-		Explains map[string]any `yaml:"explains"`
-		Mathlib  string         `yaml:"mathlib"`
-		Status   string         `yaml:"status"`
-		From     string         `yaml:"stale_from"`
-		Since    string         `yaml:"stale_since"`
+		Modules  []string          `yaml:"modules"`
+		Explains map[string]any    `yaml:"explains"`
+		Lower    map[string]string `yaml:"lower"`
+		Mathlib  string            `yaml:"mathlib"`
+		Status   string            `yaml:"status"`
+		From     string            `yaml:"stale_from"`
+		Since    string            `yaml:"stale_since"`
 	}
 	if err := yaml.Unmarshal([]byte(fm), &f); err != nil {
 		return Section{}, false, fmt.Errorf("%s: %w", path, err)
@@ -155,6 +158,7 @@ func Parse(path, src string) (Section, bool, error) {
 	}
 	s := Section{ID: ID(path), Path: path, Modules: f.Modules, Mathlib: f.Mathlib, Status: f.Status, From: f.From, Since: f.Since}
 	s.ByDepth = map[string][]string{}
+	s.Lower = f.Lower
 	for k, v := range f.Explains {
 		if l, ok := v.([]any); ok { // E1: auto is not a list
 			for _, n := range l {

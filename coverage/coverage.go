@@ -38,7 +38,7 @@ func (t *tally) add(b *Book, d *index.Decl, r depth.Result) {
 	if len(b.Homes[d.Module]) > 0 || b.Treated[d.Name] != "" {
 		t.home++
 	}
-	if rank[dp] >= rank[r.Depth] {
+	if rank[dp] >= rank[b.required(d.Name, r)] {
 		t.deep++
 		if r.Depth == depth.E3 {
 			t.e3done++
