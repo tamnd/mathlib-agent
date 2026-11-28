@@ -69,3 +69,27 @@ func TestComputeBook(t *testing.T) {
 		t.Errorf("rows = %+v", rows)
 	}
 }
+
+func TestComputeBookLower(t *testing.T) {
+	vm, err := blueprint.ParseVolumes([]byte("volumes:\n  - id: V13\n    title: Topology\n    prefixes: [Mathlib/Topology]\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ix := &index.Index{
+		Decls: []index.Decl{
+			{Name: "a", Kind: "theorem", Module: "Mathlib.Topology.Basic"},
+			{Name: "b", Kind: "theorem", Module: "Mathlib.Topology.Basic"},
+			{Name: "c", Kind: "theorem", Module: "Mathlib.Topology.Basic"},
+		},
+		Modules: []index.Module{{Module: "Mathlib.Topology.Basic"}},
+	}
+	depths := map[string]depth.Result{"a": {Depth: depth.E3}, "b": {Depth: depth.E3, Curated: true}, "c": {Depth: depth.E3}}
+	b := newBook()
+	// a is lowered and has E2 text, so it is done. b is curated, so its lowering does not count. c is lowered with no reason.
+	b.add(stale.Section{ID: "V13.C01.S01", Modules: []string{"Mathlib.Topology.Basic"}, ByDepth: map[string][]string{"E2": {"a", "b", "c"}}, Lower: map[string]string{"a": "a step of the proof of c", "b": "a step", "c": " "}})
+	rec, _ := ComputeBook(ix, vm, depths, b, "2026-11-28")
+	v := rec.Volumes[0]
+	if v.CE3 == nil || *v.CE3 != 1.0/3 || v.CE3Curated == nil || *v.CE3Curated != 0 {
+		t.Errorf("e3 %v, curated %v", v.CE3, v.CE3Curated)
+	}
+}
